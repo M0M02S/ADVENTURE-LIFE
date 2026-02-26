@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2D Block Abenteuer</title>
+    <title>ADVENTURE-LIFE · 2D Block Abenteuer</title>
     <style>
         * {
             box-sizing: border-box;
@@ -73,10 +73,20 @@
             margin-top: 10px;
             text-shadow: 0 3px 0 #005f5f;
         }
+        .title {
+            text-align: center;
+            color: #ffd966;
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 5px 0 #7f5f20;
+            letter-spacing: 3px;
+        }
     </style>
 </head>
 <body>
 <div class="game-wrapper">
+    <div class="title">ADVENTURE-LIFE</div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
     <div class="stats-panel">
@@ -193,8 +203,6 @@
         // Tastensteuerung
         const keys = { w: false, a: false, s: false, d: false };
 
-        // Kamera (optional, wir scrollen nicht, da Karte 800x600 und 20x15 Tiles = 800x600 passt genau)
-
         // ---------- INITIALISIERUNG ----------
         function init() {
             canvas = document.getElementById('gameCanvas');
@@ -220,7 +228,7 @@
             boss = null;
             currentWorld = 'lobby';
             worldMap = lobbyMap;
-            messageDiv.innerText = 'Willkommen in der Lobby! Gehe zu einem Portal (gelber Block).';
+            messageDiv.innerText = 'Willkommen in ADVENTURE-LIFE! Gehe zu einem Portal (gelber Block).';
             updateUI();
             spawnInitialMobs();
         }
