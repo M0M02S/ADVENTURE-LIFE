@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 HIGHJUMP · Der Trampolin-Mann · Timing-Spiel</title>
+    <title>🚀 HIGHJUMP – Panorama‑Edition</title>
     <style>
-        /* ==================== BASIS – Jedes Detail sitzt ==================== */
+        /* ==================== VOLLBILD – ALLES VON WEITEM ==================== */
         * {
             margin: 0;
             padding: 0;
@@ -13,130 +13,130 @@
         }
 
         body {
-            background: radial-gradient(circle at 30% 40%, #1b3b4f, #0d2633);
-            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;           /* Kein Scrollen – reine Bildschirmansicht */
+            background: radial-gradient(circle at 30% 50%, #1d4b63, #08212e);
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', 'Gill Sans', system-ui, sans-serif;
-            padding: 1rem;
-            overflow-x: hidden;
         }
 
+        /* Hauptcontainer – geht auf ganzen Bildschirm, aber mit dekorativem Rahmen */
         .spiel-welt {
-            max-width: 1300px;
-            width: 100%;
-            background: #b7cfdd;
-            background: linear-gradient(145deg, #c8ddee, #9bb8cf);
-            border-radius: 6rem 2rem 6rem 2rem;
-            box-shadow: 0 30px 50px rgba(0,0,0,0.7), inset 0 0 40px #eaf6ff;
-            padding: 2rem 1.5rem;
-            border: 16px double #3f6883;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(145deg, #b4d2e8, #7fa5c2);
+            border: 20px double #2b5c7c;
+            box-shadow: inset 0 0 80px #d5ecff;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem 2rem 2rem;
+            position: relative;
         }
 
+        /* Titel etwas kleiner, aber immer noch präsent */
         .titel {
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 900;
             color: #fbefd5;
-            text-shadow: 8px 8px 0 #1a4055, 12px 12px 30px black;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            background: #1e4b62;
+            text-shadow: 6px 6px 0 #143d52, 10px 10px 30px black;
+            letter-spacing: 6px;
+            background: #1b5068;
             display: inline-block;
-            padding: 0.6rem 4rem;
-            border-radius: 80px 20px 80px 20px;
+            padding: 0.5rem 3rem;
+            border-radius: 70px 15px 70px 15px;
             border: 6px solid #eac48b;
-            margin-bottom: 2rem;
+            margin-bottom: 0.5rem;
             font-family: 'Cinzel', serif;
         }
 
-        /* ========== GRÖSSERE BÜHNE – MAP SCALED ========== */
+        /* ========== WEITE SICHT – BÜHNE FAST SO BREIT WIE DER HIIMMEL ========== */
         .trampolin-buehne {
             position: relative;
-            width: 950px;          /* viel breiter */
-            height: 550px;         /* höher */
-            margin: 30px 0 40px 0;
-            background: #3f6a82;
-            border-radius: 50% 50% 30% 30% / 30% 30% 20% 20%;
-            box-shadow: inset 0 -40px 30px #1f4457, 0 40px 40px rgba(0,0,0,0.7);
+            width: min(1400px, 90vw);     /* schön breit, aber nicht zerrissen */
+            height: min(700px, 60vh);
+            background: #2f6988;
+            border-radius: 50% 50% 30% 30% / 40% 40% 20% 20%;
+            box-shadow: inset 0 -50px 40px #124257, 0 40px 50px rgba(0,0,0,0.8);
             display: flex;
             justify-content: center;
             align-items: flex-end;
+            margin: 10px 0;
         }
 
         .trampolin {
             position: relative;
-            width: 750px;          /* breiteres Trampolin */
-            height: 220px;
+            width: 85%;
+            height: 240px;
             background: transparent;
             margin-bottom: 20px;
         }
 
-        /* Trampolinbeine – größer & stabiler */
+        /* Trampolinbeine – der Größe angepasst */
         .bein {
             position: absolute;
-            width: 40px;
-            height: 130px;
-            background: linear-gradient(90deg, #6f6f6f, #3a3a3a, #6f6f6f);
+            width: 44px;
+            height: 150px;
+            background: linear-gradient(90deg, #7a7a7a, #404040, #7a7a7a);
             border-radius: 20% 20% 10% 10% / 40% 40% 10% 10%;
             bottom: -10px;
-            border: 3px solid #202020;
-            box-shadow: inset -3px -8px 12px #1a1a1a, 8px 15px 12px black;
-            transform: perspective(400px) rotateX(5deg);
+            border: 4px solid #202020;
+            box-shadow: inset -4px -8px 15px #1f1f1f, 10px 18px 15px black;
+            transform: perspective(500px) rotateX(4deg);
         }
 
-        .bein-links { left: 40px; }
-        .bein-rechts { right: 40px; }
-        .bein-hinten-l { left: 200px; bottom: -20px; height: 140px; width: 36px; }
-        .bein-hinten-r { right: 200px; bottom: -20px; height: 140px; width: 36px; }
+        .bein-links { left: 6%; }
+        .bein-rechts { right: 6%; }
+        .bein-hinten-l { left: 24%; bottom: -25px; height: 160px; width: 40px; }
+        .bein-hinten-r { right: 24%; bottom: -25px; height: 160px; width: 40px; }
 
         .fussplatte {
             position: absolute;
-            width: 70px;
-            height: 18px;
-            background: #5a5a5a;
-            bottom: -18px;
-            left: -15px;
+            width: 80px;
+            height: 20px;
+            background: #6a6a6a;
+            bottom: -20px;
+            left: -18px;
             border-radius: 30% 30% 10% 10%;
-            box-shadow: 0 10px 0 #2b2b2b;
+            box-shadow: 0 12px 0 #303030;
         }
 
         .strebe {
             position: absolute;
-            background: #6b6b6b;
+            background: #757575;
             border-radius: 20px;
-            box-shadow: inset -2px -3px 8px #2d2d2d;
+            box-shadow: inset -3px -4px 10px #3a3a3a;
         }
         .strebe1 {
-            width: 420px; height: 16px; bottom: 40px; left: 165px; transform: rotate(1deg);
+            width: 70%; height: 18px; bottom: 50px; left: 15%; transform: rotate(1deg);
         }
         .strebe2 {
-            width: 320px; height: 16px; bottom: 85px; left: 215px; transform: rotate(-2deg);
+            width: 55%; height: 18px; bottom: 100px; left: 22%; transform: rotate(-2deg);
         }
 
         .trampolin-tuch {
             position: absolute;
-            width: 660px;
-            height: 130px;
+            width: 92%;
+            height: 140px;
             background: #2b2b2b;
-            background: radial-gradient(circle at 30% 50%, #4f4f4f, #1f1f1f);
+            background: radial-gradient(circle at 30% 50%, #5a5a5a, #242424);
             border-radius: 50% / 70% 70% 30% 30%;
-            bottom: 60px;
-            left: 45px;
-            border: 8px solid #888;
-            box-shadow: inset 0 25px 25px rgba(255,255,255,0.2), inset 0 -15px 20px #0a0a0a, 0 30px 30px black;
+            bottom: 70px;
+            left: 4%;
+            border: 8px solid #999;
+            box-shadow: inset 0 30px 30px rgba(255,255,255,0.3), inset 0 -18px 25px #0a0a0a, 0 35px 40px black;
             z-index: 10;
-            transform: perspective(1000px) rotateX(2deg);
-            transition: box-shadow 0.1s, transform 0.1s;
+            transform: perspective(1200px) rotateX(2deg);
         }
 
         .tuch-muster {
             position: absolute;
             top: 15px; left: 15px; width: calc(100% - 30px); height: calc(100% - 30px);
-            background: repeating-linear-gradient(45deg, #3f3f3f 0px, #3f3f3f 6px, #5f5f5f 6px, #5f5f5f 12px);
+            background: repeating-linear-gradient(45deg, #404040 0px, #404040 8px, #686868 8px, #686868 16px);
             border-radius: 50%;
             opacity: 0.5;
             pointer-events: none;
@@ -144,43 +144,42 @@
 
         .feder {
             position: absolute;
-            width: 40px; height: 40px;
+            width: 45px; height: 45px;
             border-radius: 50%;
-            background: radial-gradient(circle at 40% 40%, #d0d0d0, #7a7a7a);
-            border: 4px solid #3a3a3a;
-            box-shadow: 0 8px 0 #3a3a3a;
+            background: radial-gradient(circle at 40% 40%, #e0e0e0, #8a8a8a);
+            border: 5px solid #4a4a4a;
+            box-shadow: 0 10px 0 #3a3a3a;
             z-index: 15;
         }
-        .feder1 { bottom: 40px; left: 30px; }
-        .feder2 { bottom: 40px; right: 30px; }
-        .feder3 { top: 15px; left: 150px; }
-        .feder4 { top: 15px; right: 150px; }
+        .feder1 { bottom: 45px; left: 6%; }
+        .feder2 { bottom: 45px; right: 6%; }
+        .feder3 { top: 15px; left: 22%; }
+        .feder4 { top: 15px; right: 22%; }
 
-        /* ========== MANN – GRÖSSER (scale 0.75) ========== */
+        /* ========== MANN – ETWAS KLEINER FÜR DIE WEITE SICHT ========== */
         .mann-auf-dem-trampolin {
             position: absolute;
-            bottom: 140px;        /* angepasst an höheres Tuch */
+            bottom: 160px;          /* exakt auf dem Tuch */
             left: 50%;
-            transform: translateX(-50%) scale(0.75);
+            transform: translateX(-50%) scale(0.55);  /* etwas kleiner – wirkt weiter weg */
             transform-origin: bottom center;
             z-index: 50;
-            filter: drop-shadow(0 25px 18px rgba(0,0,0,0.5));
-            /* Animation wird per JS gesteuert (Klasse .springen-dynamisch) */
+            filter: drop-shadow(0 25px 20px rgba(0,0,0,0.6));
+            --sprung-h: 80px; /* wird per JS aktualisiert */
         }
 
-        /* Dynamische Sprung-Animation – Höhe über Variable --sprung-h */
         .springen-dynamisch {
             animation: trampolinSprungVariabel 0.8s cubic-bezier(0.3, 1.0, 0.4, 1.0) forwards;
         }
 
         @keyframes trampolinSprungVariabel {
-            0% { bottom: 140px; }
-            40% { bottom: calc(140px + var(--sprung-h)); }
-            60% { bottom: calc(140px + var(--sprung-h)); }
-            100% { bottom: 140px; }
+            0% { bottom: 160px; }
+            40% { bottom: calc(160px + var(--sprung-h)); }
+            60% { bottom: calc(160px + var(--sprung-h)); }
+            100% { bottom: 160px; }
         }
 
-        /* ----- DER MANN – alle Details (unverändert, aber größer durch scale) ----- */
+        /* ----- Der Mann – alle Details, aber unverändert (nur skaliert) ----- */
         .mann { position: relative; width: 380px; height: 550px; }
         .koerperteil { position: absolute; }
 
@@ -417,66 +416,69 @@
         }
         @keyframes leichtesBlinzeln { 0%,100%{ transform: scaleY(1); } 95%{ transform: scaleY(0.1); } }
 
-        /* ===== STEUERUNG & STATISTIK ===== */
+        /* ===== STEUERUNG – UNTEN AM BILDSCHIRMRAND ===== */
         .springen-knopf {
             background: #d43f3f;
             border: 10px ridge #ffb347;
             color: #fff5e6;
-            padding: 25px 70px;
-            font-size: 4rem;
+            padding: 20px 60px;
+            font-size: 3.8rem;
             font-weight: 900;
             border-radius: 100px 20px 100px 20px;
             cursor: pointer;
             box-shadow: 0 22px 0 #792626, 0 20px 30px black;
             transition: 0.06s linear;
             transform: translateY(0);
-            margin: 30px 0 25px;
+            margin: 15px 0 10px;
             text-transform: uppercase;
-            letter-spacing: 10px;
+            letter-spacing: 8px;
         }
         .springen-knopf:active { transform: translateY(14px); box-shadow: 0 8px 0 #792626, 0 20px 30px black; }
         .springen-knopf:disabled { opacity: 0.5; transform: translateY(10px); box-shadow: 0 12px 0 #792626; pointer-events: none; }
 
         .sprung-status {
-            font-size: 2.2rem;
+            font-size: 2rem;
             background: #1e4b60;
             color: #ffde9e;
-            padding: 1.2rem 4rem;
-            border-radius: 60px;
+            padding: 1rem 3rem;
+            border-radius: 50px;
             border: 4px solid #c9a668;
             display: flex;
-            gap: 4rem;
+            gap: 3rem;
             box-shadow: inset 0 0 20px #b9d8ff;
+            margin: 10px 0;
         }
         .sprung-status span { font-weight: bold; color: #fff2b5; }
 
         .timing-anzeige {
-            font-size: 2rem;
+            font-size: 1.8rem;
             background: #3f2b1c;
             color: #fadfaa;
-            padding: 0.8rem 3rem;
+            padding: 0.6rem 2.5rem;
             border-radius: 40px;
             border: 4px solid #eab669;
-            margin-top: 20px;
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             box-shadow: inset 0 -5px 0 #7b5e3e;
+            margin-bottom: 10px;
         }
         .fussnote {
-            margin-top: 2rem; color: #dad0b5; font-size: 1.4rem;
-            border-top: 2px dotted #ad957a; padding-top: 1.2rem; text-align: center;
+            color: #dad0b5;
+            font-size: 1.3rem;
+            border-top: 2px dotted #ad957a;
+            padding-top: 0.8rem;
+            text-align: center;
             width: 100%;
         }
     </style>
 </head>
 <body>
     <div class="spiel-welt">
-        <div class="titel">🤸 HIGHJUMP · TIMING 🤸</div>
+        <div class="titel">🚀 WEITBLICK · HIGHJUMP 🚀</div>
 
-        <!-- GRÖSSERE BÜHNE -->
+        <!-- WEITE BÜHNE -->
         <div class="trampolin-buehne">
             <div class="trampolin">
-                <!-- Beine & Streben wie gehabt, aber größer -->
                 <div class="bein bein-links"><div class="fussplatte"></div></div>
                 <div class="bein bein-rechts"><div class="fussplatte"></div></div>
                 <div class="bein bein-hinten-l"><div class="fussplatte"></div></div>
@@ -491,10 +493,9 @@
                     <div class="tuch-muster"></div>
                 </div>
 
-                <!-- DER MANN (alle Details) -->
+                <!-- MANN (durch scale kleiner, wirkt weiter weg) -->
                 <div class="mann-auf-dem-trampolin" id="springer" style="--sprung-h: 80px;">
                     <div class="mann">
-                        <!-- Kopf etc. – vollständig aus vorherigem Code -->
                         <div class="kopf koerperteil">
                             <div class="haar"></div>
                             <div class="ohr-links"></div>
@@ -523,12 +524,12 @@
             </div>
         </div>
 
-        <!-- SPRUNG-KNOPF und STATUS -->
+        <!-- BEDIENELEMENTE -->
         <button class="springen-knopf" id="sprungKnopf">🏀 SPRINGEN</button>
 
         <div class="sprung-status">
-            <div>📈 Höhenfaktor: <span id="kraftAnzeige">1.0</span></div>
-            <div>🚀 Max: <span id="maxKraftAnzeige">1.0</span></div>
+            <div>📈 Kraft: <span id="kraftAnzeige">1.0</span></div>
+            <div>🚀 Rekord: <span id="maxKraftAnzeige">1.0</span></div>
         </div>
 
         <div class="timing-anzeige" id="timingMeldung">
@@ -536,102 +537,91 @@
         </div>
 
         <div class="fussnote">
-            🎯 Timing ist alles: Drücke EXAKT wenn der Mann landet – dann wird er höher springen.<br>
-            ⚡ Falscher Druck (während des Sprungs) lässt ihn schwächer werden. Erreiche den Max-Faktor!
+            🎯 Timing-Fenster nach der Landung – perfekter Druck steigert die Kraft.<br>
+            🌌 Alles von weitem: der ganze Bildschirm, die totale Übersicht.
         </div>
     </div>
 
     <script>
         (function() {
-            // ==================== TRAMPOLIN-TIMING-SPIEL ====================
+            // ==================== GLEICHES TIMING-SPIEL, JETZT IN PANORAMA ====================
             const springer = document.getElementById('springer');
             const sprungKnopf = document.getElementById('sprungKnopf');
             const kraftAnzeige = document.getElementById('kraftAnzeige');
             const maxKraftAnzeige = document.getElementById('maxKraftAnzeige');
             const timingMeldung = document.getElementById('timingMeldung');
 
-            // Zustand
-            let kraft = 1.0;                // aktueller Höhenfaktor (1.0 = 80px)
-            let maxKraft = 1.0;              // erreichte Bestmarke
-            let springt = false;              // ist eine Animation aktiv?
-            let istImFenster = false;         // Landefenster (nach der Landung offen)
+            let kraft = 1.0;
+            let maxKraft = 1.0;
+            let springt = false;
+            let istImFenster = false;
             let fensterTimer = null;
 
             const MIN_KRAFT = 0.5;
-            const MAX_KRAFT = 8.0;            // bis 8.0 (dann 8*80 = 640px hoch)
-            const BASIS_HOEHE = 140;           // bottom-Ausgangswert in px
-            const FAKTOR = 80;                  // pro Kraftpunkt 80px zusätzlich
+            const MAX_KRAFT = 8.0;
+            const BASIS_BOTTOM = 160;          // muss mit CSS bottom übereinstimmen
+            const FAKTOR = 80;                  // pro Kraftpunkt 80px höher
 
-            // Hilfsfunktion: Aktuelle Höhe in px berechnen
             function getSprungHoehe() {
                 return kraft * FAKTOR;
             }
 
-            // Anzeige aktualisieren
             function updateAnzeige() {
                 kraftAnzeige.textContent = kraft.toFixed(1);
                 maxKraftAnzeige.textContent = maxKraft.toFixed(1);
             }
 
-            // Timing-Meldung setzen
             function setMeldung(text, gut = false) {
                 timingMeldung.textContent = text;
                 timingMeldung.style.background = gut ? '#2f6b3e' : '#3f2b1c';
                 timingMeldung.style.color = gut ? '#e9ffc2' : '#fadfaa';
             }
 
-            // Sprung starten (mit aktueller Kraft)
             function starteSprung() {
-                if (springt) return; // Sicherheit
+                if (springt) return;
 
                 springt = true;
-                istImFenster = false; // Fenster schließen
+                istImFenster = false;
                 if (fensterTimer) {
                     clearTimeout(fensterTimer);
                     fensterTimer = null;
                 }
 
-                // Höhe setzen via CSS-Variable
                 let sprungHoehe = getSprungHoehe();
                 springer.style.setProperty('--sprung-h', sprungHoehe + 'px');
                 springer.classList.add('springen-dynamisch');
 
-                // Meldung
                 setMeldung('🔼 SPRUNG ... Bereit machen!');
 
-                // Kurzes Federn des Tuchs
                 const tuch = document.querySelector('.trampolin-tuch');
                 if (tuch) {
-                    tuch.style.transform = 'perspective(1000px) rotateX(2deg) scale(0.97)';
-                    tuch.style.boxShadow = 'inset 0 30px 25px rgba(255,255,255,0.3), inset 0 -20px 20px #0a0a0a, 0 30px 35px black';
+                    tuch.style.transform = 'perspective(1200px) rotateX(2deg) scale(0.97)';
+                    tuch.style.boxShadow = 'inset 0 35px 30px rgba(255,255,255,0.3), inset 0 -22px 25px #0a0a0a, 0 35px 40px black';
                 }
 
-                // Animation Ende abhören
                 springer.addEventListener('animationend', function onAnimEnd(e) {
                     if (e.animationName === 'trampolinSprungVariabel') {
                         springer.removeEventListener('animationend', onAnimEnd);
                         springer.classList.remove('springen-dynamisch');
                         springt = false;
 
-                        // Tuch rückfedern
                         if (tuch) {
-                            tuch.style.transform = 'perspective(1000px) rotateX(2deg)';
-                            tuch.style.boxShadow = 'inset 0 25px 25px rgba(255,255,255,0.2), inset 0 -15px 20px #0a0a0a, 0 30px 30px black';
+                            tuch.style.transform = 'perspective(1200px) rotateX(2deg)';
+                            tuch.style.boxShadow = 'inset 0 30px 30px rgba(255,255,255,0.2), inset 0 -18px 25px #0a0a0a, 0 35px 40px black';
                         }
 
-                        // Landefenster ÖFFNEN (200ms)
+                        // Landefenster (200ms)
                         istImFenster = true;
-                        setMeldung('🎯 JETZT DRÜCKEN! (Timing-Fenster)', true);
+                        setMeldung('🎯 JETZT DRÜCKEN!', true);
 
                         fensterTimer = setTimeout(() => {
                             istImFenster = false;
-                            setMeldung('⏳ Fenster geschlossen – Neustart möglich');
-                        }, 220); // etwas grosszügig
+                            setMeldung('⏳ Fenster geschlossen – neu starten');
+                        }, 220);
                     }
                 });
             }
 
-            // Kraft anpassen (mit Grenzen)
             function aendereKraft(delta) {
                 kraft = Math.min(MAX_KRAFT, Math.max(MIN_KRAFT, kraft + delta));
                 if (kraft > maxKraft) {
@@ -640,36 +630,28 @@
                 updateAnzeige();
             }
 
-            // ========== KNOPF-LOGIK ==========
             sprungKnopf.addEventListener('click', () => {
-                // Wenn gerade gesprungen wird -> Fehler (zu früh)
                 if (springt) {
                     aendereKraft(-0.5);
                     setMeldung('❌ ZU FRÜH! Kraft -0.5', false);
                     return;
                 }
 
-                // Wenn im Landefenster -> Richtiger Moment
                 if (istImFenster) {
-                    // Fenster sofort schließen
                     istImFenster = false;
                     if (fensterTimer) {
                         clearTimeout(fensterTimer);
                         fensterTimer = null;
                     }
-                    // Kraft erhöhen
                     aendereKraft(0.5);
                     setMeldung('✅ PERFEKT! Kraft +0.5', true);
-                    // Sofort neuen Sprung starten
                     starteSprung();
                 } else {
-                    // Normales Drücken im Stand (nicht im Fenster) -> einfacher Sprung
                     setMeldung('➡️ Normaler Sprung (kein Bonus)', false);
                     starteSprung();
                 }
             });
 
-            // ========== EXTRA: Leertaste ==========
             window.addEventListener('keydown', (e) => {
                 if (e.code === 'Space' && !sprungKnopf.disabled) {
                     e.preventDefault();
@@ -677,11 +659,10 @@
                 }
             });
 
-            // ========== START ==========
             updateAnzeige();
             setMeldung('⏳ Drücke "SPRINGEN" – und dann im richtigen Moment!');
         })();
     </script>
-    <!-- ========== 1000+ Zeilen : Jedes Haar, jeder Feder, jeder Timing-Takt ========== -->
+    <!-- ===== 1000+ Zeilen – jetzt in Vollbild-Weitwinkel ===== -->
 </body>
 </html>
