@@ -2,10 +2,9 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ADVENTURE-LIFE · Ultimate Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>ADVENTURE-LIFE · Mobile Edition</title>
     <style>
-        /* ========== RESET & BASIS ========== */
         * {
             box-sizing: border-box;
             user-select: none;
@@ -14,169 +13,140 @@
             padding: 0;
         }
         body {
-            background: radial-gradient(circle at 20% 30%, #0f2a35, #05161e);
+            background: #0f2a35;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            padding: 10px;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            padding: 10px;
         }
         .game-container {
-            max-width: 1100px;
+            max-width: 1000px;
             width: 100%;
-            background: linear-gradient(145deg, #1e4b5e, #0e2f3a);
-            border-radius: 70px;
-            padding: 25px 20px;
-            box-shadow: 0 30px 40px rgba(0,0,0,0.8), 0 0 0 4px #6fa5bb inset;
-        }
-
-        /* ========== CANVAS ========== */
-        .canvas-wrapper {
-            display: flex;
-            justify-content: center;
-            background: #0c2c38;
+            background: #1e4b5e;
             border-radius: 60px;
             padding: 20px;
-            box-shadow: inset 0 0 0 5px #367a94, 0 20px 30px black;
+            box-shadow: 0 20px 30px black;
+            margin-bottom: 20px;
         }
         canvas {
+            display: block;
             width: 100%;
             aspect-ratio: 800/600;
-            display: block;
-            border-radius: 50px;
             background: #2e6d82;
+            border-radius: 50px;
             touch-action: none;
             box-shadow: 0 0 0 4px #89c2d4;
         }
-
-        /* ========== STATISTIK-LEISTE ========== */
         .stats {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-around;
-            align-items: center;
             background: #0d3747;
-            margin: 20px 0 15px;
-            padding: 15px 10px;
-            border-radius: 80px;
-            border: 4px solid #73b1cc;
-            box-shadow: 0 10px 0 #07303d, inset 0 2px 10px #bee0ff;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 60px;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: bold;
-            gap: 10px;
+            border: 3px solid #73b1cc;
         }
         .stat-item {
             background: #02212b;
-            padding: 10px 30px;
-            border-radius: 50px;
-            box-shadow: inset 0 -5px 0 #1b5b70;
+            padding: 8px 20px;
+            border-radius: 40px;
             color: #ffe484;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
-
-        /* ========== BUTTONS ========== */
+        .button-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .upgrade-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
         button {
             background: #ffbc3b;
             border: none;
-            font-size: 1.7rem;
+            font-size: 1.6rem;
             font-weight: bold;
             padding: 15px 35px;
             border-radius: 70px;
-            box-shadow: 0 12px 0 #b27200, 0 8px 15px black;
-            transition: 0.06s linear;
+            box-shadow: 0 10px 0 #b27200;
+            transition: 0.05s linear;
             color: #281e00;
             cursor: pointer;
             touch-action: manipulation;
-            min-width: 200px;
-            letter-spacing: 1px;
+            flex: 1 1 auto;
+            min-width: 220px;
         }
         button:active {
-            transform: translateY(8px);
+            transform: translateY(6px);
             box-shadow: 0 4px 0 #b27200;
-        }
-        .upgrade-section {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 25px;
-            margin: 20px 0;
-        }
-        .upgrade-btn {
-            background: #3f8ab3;
-            box-shadow: 0 12px 0 #1e4d68;
-            color: white;
-            font-size: 1.5rem;
-            padding: 15px 30px;
-        }
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 15px 0 10px;
         }
         .fight-btn {
             background: #d44;
-            box-shadow: 0 12px 0 #922;
+            box-shadow: 0 10px 0 #922;
         }
         .lobby-btn {
             background: #4caf50;
-            box-shadow: 0 12px 0 #2e7d32;
+            box-shadow: 0 10px 0 #2e7d32;
         }
-
-        /* ========== NACHRICHTEN ========== */
-        .message-area {
+        .upgrade-btn {
+            background: #3f8ab3;
+            box-shadow: 0 10px 0 #1e4d68;
+            color: white;
+        }
+        .message {
             text-align: center;
             color: #c4f2f2;
-            font-size: 1.9rem;
-            font-weight: 800;
-            text-shadow: 0 4px 0 #007777;
-            margin: 15px 0 5px;
-            min-height: 3.5rem;
+            font-size: 1.7rem;
+            font-weight: bold;
             background: #08242e;
-            padding: 10px;
+            padding: 15px;
             border-radius: 60px;
+            margin: 10px 0;
+        }
+        .hint {
+            color: #aaddff;
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 5px;
         }
     </style>
 </head>
 <body>
 <div class="game-container">
-    <!-- CANVAS -->
-    <div class="canvas-wrapper">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-    </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-    <!-- STATISTIK -->
     <div class="stats">
         <div class="stat-item">❤️ <span id="hpDisplay">10/10</span></div>
         <div class="stat-item">⚔️ <span id="dmgDisplay">2</span></div>
         <div class="stat-item">🪙 <span id="goldDisplay">0</span></div>
     </div>
 
-    <!-- UPGRADE-BEREICH (immer sichtbar) -->
-    <div class="upgrade-section">
-        <button class="upgrade-btn" id="upgradeHpBtn">❤️ Leben +2 (10🪙)</button>
-        <button class="upgrade-btn" id="upgradeDmgBtn">⚔️ Schaden +1 (8🪙)</button>
+    <div class="button-section">
+        <div class="upgrade-row">
+            <button class="upgrade-btn" id="upgradeHpBtn">❤️ Leben +2 (10🪙)</button>
+            <button class="upgrade-btn" id="upgradeDmgBtn">⚔️ Schaden +1 (8🪙)</button>
+        </div>
+        <div class="upgrade-row">
+            <button class="fight-btn" id="startFightBtn">⚔️ KAMPF STARTEN</button>
+            <button class="lobby-btn" id="backToLobbyBtn">🏠 ZURÜCK ZUR LOBBY</button>
+        </div>
     </div>
 
-    <!-- AKTIONSBUTTONS (Kampf / Lobby) -->
-    <div class="action-buttons">
-        <button class="fight-btn" id="startFightBtn">⚔️ KAMPF STARTEN</button>
-        <button class="lobby-btn" id="backToLobbyBtn">🏠 ZURÜCK ZUR LOBBY</button>
-    </div>
-
-    <!-- NACHRICHTENFELD -->
-    <div id="message" class="message-area">Willkommen in der Lobby! Verbessere deinen Charakter.</div>
+    <div id="message" class="message">Willkommen in der Lobby! Verbessere deinen Charakter.</div>
+    <div class="hint">⬆️ Ziehe zum Scrollen, falls nötig. Im Kampf: Links bewegen, Rechts angreifen.</div>
 </div>
 
 <script>
     (function() {
-        // ========================================================================
-        //  KONFIGURATION & GLOBALE VARIABLEN (ca. 2000 Zeilen Code)
-        // ========================================================================
+        // ==================== KONFIGURATION ====================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -190,7 +160,7 @@
         const upgradeHpBtn = document.getElementById('upgradeHpBtn');
         const upgradeDmgBtn = document.getElementById('upgradeDmgBtn');
 
-        // Spieler-Daten
+        // Spieler
         let player = {
             x: 400, y: 300,
             health: 10,
@@ -198,40 +168,23 @@
             damage: 2,
             gold: 0,
             invincible: 0,
-            attackCooldown: 0,      // für Animation
+            attackCooldown: 0,
         };
 
-        // Upgrade-Kosten (dynamisch)
+        // Upgrade-Kosten
         let hpUpgradeCost = 10;
         let dmgUpgradeCost = 8;
 
-        // Kampf-Variablen
+        // Kampf
         let inFight = false;
         let mobs = [];
-        let mobIdCounter = 0;
+        let mobId = 0;
 
         // Joysticks
-        let moveJoystick = {
-            active: false,
-            startX: 0, startY: 0,
-            currentX: 0, currentY: 0,
-            dirX: 0, dirY: 0,
-            radius: 80,
-        };
-        let attackJoystick = {
-            active: false,
-            startX: 0, startY: 0,
-            currentX: 0, currentY: 0,
-            dirX: 0, dirY: 0,
-            radius: 80,
-        };
+        let moveJoystick = { active: false, startX: 0, startY: 0, currentX: 0, currentY: 0, dirX: 0, dirY: 0, radius: 80 };
+        let attackJoystick = { active: false, startX: 0, startY: 0, currentX: 0, currentY: 0, dirX: 0, dirY: 0, radius: 80 };
 
-        // Spiel läuft
-        let gameRunning = true;
-
-        // ========================================================================
-        //  HILFSFUNKTIONEN
-        // ========================================================================
+        // ==================== HILFSFUNKTIONEN ====================
         function updateUI() {
             hpSpan.innerText = `${player.health}/${player.maxHealth}`;
             dmgSpan.innerText = player.damage;
@@ -247,7 +200,7 @@
                 y = 100 + Math.random() * 400;
             } while (Math.hypot(x - player.x, y - player.y) < 100);
             mobs.push({
-                id: mobIdCounter++,
+                id: mobId++,
                 x, y,
                 health: 5,
                 maxHealth: 5,
@@ -265,21 +218,18 @@
             player.y = 300;
             player.invincible = 0;
             player.attackCooldown = 0;
-            messageDiv.innerText = '⚔️ KAMPF! Linke Seite bewegen, rechte Seite angreifen!';
+            messageDiv.innerText = '⚔️ KAMPF! Links bewegen, Rechts angreifen!';
         }
 
         function endFight(win = true) {
             inFight = false;
             moveJoystick.active = false;
             attackJoystick.active = false;
-            if (win) messageDiv.innerText = '🏆 Zurück in der Lobby. Sammle Gold und upgrade!';
-            else messageDiv.innerText = '💀 Du bist gestorben ... aber gold bleibt erhalten.';
+            messageDiv.innerText = win ? '🏆 Zurück in der Lobby.' : '💀 Du bist gestorben!';
             updateUI();
         }
 
-        // ========================================================================
-        //  JOYSTICK-LOGIK
-        // ========================================================================
+        // ==================== JOYSTICKS ====================
         function updateJoystick(js) {
             if (!js.active) return;
             let dx = js.currentX - js.startX;
@@ -300,7 +250,6 @@
             const speed = 5;
             let newX = player.x + moveJoystick.dirX * speed;
             let newY = player.y + moveJoystick.dirY * speed;
-            // Canvas-Grenzen
             newX = Math.max(30, Math.min(770, newX));
             newY = Math.max(30, Math.min(570, newY));
             player.x = newX;
@@ -311,37 +260,28 @@
             if (!inFight || !attackJoystick.active || player.attackCooldown > 0) return;
             if (attackJoystick.dirX === 0 && attackJoystick.dirY === 0) return;
 
-            // Angriff ausführen
-            player.attackCooldown = 20; // Dauer der Animation
+            player.attackCooldown = 20;
             const attackRange = 70;
             const attackX = player.x + attackJoystick.dirX * 35;
             const attackY = player.y + attackJoystick.dirY * 35;
 
-            let hitSomething = false;
+            let hit = false;
             for (let mob of mobs) {
                 const dist = Math.hypot(attackX - mob.x, attackY - mob.y);
                 if (dist < attackRange) {
                     mob.health -= player.damage;
-                    hitSomething = true;
-                    if (mob.health <= 0) {
-                        player.gold += 3;
-                    }
+                    hit = true;
+                    if (mob.health <= 0) player.gold += 3;
                 }
             }
-            // Tote Mobs entfernen
             mobs = mobs.filter(m => m.health > 0);
-            if (hitSomething) {
-                // Kurzer Feedback
-            }
+            if (hit) { /* Feedback */ }
         }
 
-        // ========================================================================
-        //  MOB-LOGIK
-        // ========================================================================
+        // ==================== MOBS ====================
         function updateMobs() {
             if (!inFight) return;
             for (let mob of mobs) {
-                // Bewegung zum Spieler
                 const dx = player.x - mob.x;
                 const dy = player.y - mob.y;
                 const dist = Math.hypot(dx, dy);
@@ -351,8 +291,7 @@
                     mob.x += moveX;
                     mob.y += moveY;
                 }
-                // Kollision mit Spieler
-                if (dist < 45) { // Spielerradius ~25 + Mobradius 22
+                if (dist < 45) {
                     if (player.invincible <= 0) {
                         player.health -= mob.damage;
                         player.invincible = 40;
@@ -361,30 +300,21 @@
                 }
             }
 
-            // Prüfen, ob Spieler tot
             if (player.health <= 0) {
                 player.health = 0;
                 endFight(false);
-                // Gold bleibt, Leben wird in der Lobby nicht regeneriert – muss durch Upgrade oder Neustart?
-                // Aber wir setzen health auf maxHealth? Nein, soll scheitern.
-                messageDiv.innerText = '💀 Du bist gestorben! Klicke auf "Kampf starten" für einen neuen Versuch.';
-                inFight = false;
             }
-
-            // Prüfen, ob alle Mobs tot
             if (mobs.length === 0 && inFight) {
                 endFight(true);
             }
         }
 
-        // ========================================================================
-        //  UPGRADES
-        // ========================================================================
+        // ==================== UPGRADES ====================
         function upgradeHealth() {
             if (player.gold >= hpUpgradeCost) {
                 player.gold -= hpUpgradeCost;
                 player.maxHealth += 2;
-                player.health = player.maxHealth; // volles Leben
+                player.health = player.maxHealth;
                 hpUpgradeCost = Math.floor(hpUpgradeCost * 1.8);
                 messageDiv.innerText = '❤️ Leben erhöht!';
                 updateUI();
@@ -405,70 +335,32 @@
             }
         }
 
-        // ========================================================================
-        //  ZEICHNEN
-        // ========================================================================
+        // ==================== ZEICHNEN ====================
         function drawLobby() {
-            // Hintergrund
             ctx.fillStyle = '#1f6d8f';
             ctx.fillRect(0, 0, 800, 600);
-            // Dekor
             ctx.font = 'bold 48px "Segoe UI"';
             ctx.fillStyle = '#ffeca1';
             ctx.shadowColor = 'black';
             ctx.shadowBlur = 15;
             ctx.fillText('🏠 LOBBY', 250, 150);
             ctx.shadowBlur = 0;
-
-            // Bodenmuster
-            ctx.strokeStyle = '#aad4e6';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 800; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(i, 200);
-                ctx.lineTo(i+30, 550);
-                ctx.strokeStyle = '#7fc5dc';
-                ctx.stroke();
-            }
-
-            // Spieler in der Lobby (hübsch)
             drawPlayer(true);
         }
 
         function drawFight() {
-            // Hintergrund Kampf (Wiese)
             ctx.fillStyle = '#3f9469';
             ctx.fillRect(0, 0, 800, 600);
-            // Gras-Strukturen
-            ctx.fillStyle = '#5fb87f';
-            for (let i = 0; i < 20; i++) {
-                ctx.fillRect(i*40 + 10, 0, 5, 600);
-            }
-
-            // Mobs
-            for (let mob of mobs) {
-                drawMob(mob);
-            }
-
-            // Spieler
+            for (let mob of mobs) drawMob(mob);
             drawPlayer(false);
-
-            // Joysticks zeichnen (wenn aktiv)
-            if (moveJoystick.active) {
-                drawJoystick(moveJoystick, '#44aaff');
-            }
-            if (attackJoystick.active) {
-                drawJoystick(attackJoystick, '#ff6666');
-            }
-
-            // Cooldown-Balken für Angriff
+            if (moveJoystick.active) drawJoystick(moveJoystick, '#44aaff');
+            if (attackJoystick.active) drawJoystick(attackJoystick, '#ff6666');
             if (player.attackCooldown > 0) {
                 ctx.fillStyle = '#000000aa';
                 ctx.fillRect(10, 10, 150, 20);
                 ctx.fillStyle = '#ffcc00';
                 ctx.fillRect(10, 10, 150 * (1 - player.attackCooldown/20), 20);
                 ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
                 ctx.strokeRect(10, 10, 150, 20);
             }
         }
@@ -476,30 +368,20 @@
         function drawPlayer(lobby = false) {
             const px = player.x;
             const py = player.y;
-
-            // Schatten
             ctx.shadowColor = 'black';
             ctx.shadowBlur = 15;
             ctx.shadowOffsetX = 5;
             ctx.shadowOffsetY = 5;
-
-            // Körper (runder, freundlicher Spieler)
             ctx.beginPath();
             ctx.ellipse(px, py, 25, 28, 0, 0, 2*Math.PI);
             ctx.fillStyle = '#fad46c';
             ctx.fill();
-
-            // Gürtel
             ctx.fillStyle = '#b47c48';
             ctx.fillRect(px-20, py+10, 40, 8);
-
-            // Kopf (Helm)
             ctx.beginPath();
             ctx.arc(px, py-20, 20, 0, Math.PI, true);
             ctx.fillStyle = '#7faa6f';
             ctx.fill();
-
-            // Augen
             ctx.shadowBlur = 0;
             ctx.fillStyle = 'white';
             ctx.beginPath();
@@ -515,32 +397,23 @@
             ctx.beginPath();
             ctx.arc(px+8, py-25, 2, 0, 2*Math.PI);
             ctx.fill();
-
-            // Schild (links)
             ctx.fillStyle = '#b48b5a';
             ctx.beginPath();
             ctx.ellipse(px-30, py-5, 12, 18, 0, 0, 2*Math.PI);
             ctx.fill();
-
-            // Schwert (rechts) – je nach Angriffs-Cooldown
             if (player.attackCooldown > 0 && !lobby) {
-                // Angriffsanimation: Schwert ausgestreckt
                 ctx.fillStyle = '#e0e0e0';
                 ctx.fillRect(px+30, py-25, 40, 8);
                 ctx.fillRect(px+60, py-35, 8, 28);
-                // Schimmer
                 ctx.fillStyle = '#ffffb0';
                 ctx.globalAlpha = 0.5;
                 ctx.fillRect(px+32, py-27, 36, 4);
                 ctx.globalAlpha = 1;
             } else {
-                // Normales Schwert an der Seite
                 ctx.fillStyle = '#aaa';
                 ctx.fillRect(px+20, py-20, 28, 7);
                 ctx.fillRect(px+40, py-27, 7, 21);
             }
-
-            // Invincible-Effekt (blinken)
             if (player.invincible > 0) {
                 ctx.globalAlpha = 0.4;
                 ctx.beginPath();
@@ -557,13 +430,10 @@
             ctx.shadowBlur = 12;
             ctx.shadowOffsetX = 4;
             ctx.shadowOffsetY = 4;
-            // Körper
             ctx.beginPath();
             ctx.ellipse(mob.x, mob.y, mob.radius, mob.radius*1.1, 0, 0, 2*Math.PI);
             ctx.fillStyle = '#c44';
             ctx.fill();
-
-            // Augen
             ctx.shadowBlur = 0;
             ctx.fillStyle = 'white';
             ctx.beginPath();
@@ -579,8 +449,6 @@
             ctx.beginPath();
             ctx.arc(mob.x+7, mob.y-9, 2.5, 0, 2*Math.PI);
             ctx.fill();
-
-            // Hörner (optional)
             ctx.fillStyle = '#822';
             ctx.beginPath();
             ctx.moveTo(mob.x-15, mob.y-20);
@@ -592,8 +460,6 @@
             ctx.lineTo(mob.x+25, mob.y-35);
             ctx.lineTo(mob.x+10, mob.y-30);
             ctx.fill();
-
-            // Gesundheitsbalken
             ctx.fillStyle = '#000000aa';
             ctx.fillRect(mob.x-25, mob.y-45, 50, 8);
             ctx.fillStyle = '#2ecc71';
@@ -618,17 +484,11 @@
             ctx.globalAlpha = 1;
         }
 
-        // ========================================================================
-        //  GAMELOOP
-        // ========================================================================
+        // ==================== GAMELOOP ====================
         function gameLoop() {
-            if (!gameRunning) return;
-
             if (inFight) {
-                // Cooldowns runterzählen
                 if (player.attackCooldown > 0) player.attackCooldown--;
                 if (player.invincible > 0) player.invincible--;
-
                 applyMovement();
                 applyAttack();
                 updateMobs();
@@ -636,44 +496,34 @@
             } else {
                 drawLobby();
             }
-
             requestAnimationFrame(gameLoop);
         }
 
-        // ========================================================================
-        //  TOUCH-EVENTS (für Handy/Tablet)
-        // ========================================================================
+        // ==================== TOUCH-EVENTS ====================
         function handleTouchStart(e) {
             e.preventDefault();
-            if (!inFight) return; // Joysticks nur im Kampf
-
+            if (!inFight) return;
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
-
             for (let i = 0; i < e.touches.length; i++) {
                 const touch = e.touches[i];
                 const canvasX = (touch.clientX - rect.left) * scaleX;
                 const canvasY = (touch.clientY - rect.top) * scaleY;
-
                 if (canvasX < canvas.width / 2) {
-                    // Linke Seite: Bewegung
                     moveJoystick.active = true;
                     moveJoystick.startX = canvasX;
                     moveJoystick.startY = canvasY;
                     moveJoystick.currentX = canvasX;
                     moveJoystick.currentY = canvasY;
-                    moveJoystick.dirX = 0;
-                    moveJoystick.dirY = 0;
+                    moveJoystick.dirX = 0; moveJoystick.dirY = 0;
                 } else {
-                    // Rechte Seite: Angriff
                     attackJoystick.active = true;
                     attackJoystick.startX = canvasX;
                     attackJoystick.startY = canvasY;
                     attackJoystick.currentX = canvasX;
                     attackJoystick.currentY = canvasY;
-                    attackJoystick.dirX = 0;
-                    attackJoystick.dirY = 0;
+                    attackJoystick.dirX = 0; attackJoystick.dirY = 0;
                 }
             }
         }
@@ -681,16 +531,13 @@
         function handleTouchMove(e) {
             e.preventDefault();
             if (!inFight) return;
-
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
-
             for (let i = 0; i < e.touches.length; i++) {
                 const touch = e.touches[i];
                 const canvasX = (touch.clientX - rect.left) * scaleX;
                 const canvasY = (touch.clientY - rect.top) * scaleY;
-
                 if (moveJoystick.active) {
                     moveJoystick.currentX = canvasX;
                     moveJoystick.currentY = canvasY;
@@ -710,7 +557,7 @@
             attackJoystick.active = false;
         }
 
-        // Maus-Fallback für PC-Tests
+        // Maus-Fallback
         function handleMouseDown(e) {
             if (!inFight) return;
             const rect = canvas.getBoundingClientRect();
@@ -718,23 +565,18 @@
             const scaleY = canvas.height / rect.height;
             const canvasX = (e.clientX - rect.left) * scaleX;
             const canvasY = (e.clientY - rect.top) * scaleY;
-
             if (canvasX < canvas.width / 2) {
                 moveJoystick.active = true;
                 moveJoystick.startX = canvasX;
                 moveJoystick.startY = canvasY;
                 moveJoystick.currentX = canvasX;
                 moveJoystick.currentY = canvasY;
-                moveJoystick.dirX = 0;
-                moveJoystick.dirY = 0;
             } else {
                 attackJoystick.active = true;
                 attackJoystick.startX = canvasX;
                 attackJoystick.startY = canvasY;
                 attackJoystick.currentX = canvasX;
                 attackJoystick.currentY = canvasY;
-                attackJoystick.dirX = 0;
-                attackJoystick.dirY = 0;
             }
         }
 
@@ -746,7 +588,6 @@
             const scaleY = canvas.height / rect.height;
             const canvasX = (e.clientX - rect.left) * scaleX;
             const canvasY = (e.clientY - rect.top) * scaleY;
-
             if (moveJoystick.active) {
                 moveJoystick.currentX = canvasX;
                 moveJoystick.currentY = canvasY;
@@ -764,49 +605,23 @@
             attackJoystick.active = false;
         }
 
-        // ========================================================================
-        //  EVENT LISTENER INIT
-        // ========================================================================
-        function setupEventListeners() {
-            // Touch
+        // ==================== INIT ====================
+        function init() {
+            updateUI();
             canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
             canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
             canvas.addEventListener('touchend', handleTouchEnd);
             canvas.addEventListener('touchcancel', handleTouchEnd);
-
-            // Maus
             canvas.addEventListener('mousedown', handleMouseDown);
             canvas.addEventListener('mousemove', handleMouseMove);
             canvas.addEventListener('mouseup', handleMouseUp);
             canvas.addEventListener('mouseleave', handleMouseUp);
 
-            // Buttons
-            startFightBtn.addEventListener('click', () => {
-                if (!inFight) {
-                    startFight();
-                } else {
-                    messageDiv.innerText = 'Du bist bereits im Kampf!';
-                }
-            });
-
-            backToLobbyBtn.addEventListener('click', () => {
-                if (inFight) {
-                    endFight(false);
-                } else {
-                    messageDiv.innerText = 'Schon in der Lobby.';
-                }
-            });
-
+            startFightBtn.addEventListener('click', () => { if (!inFight) startFight(); else messageDiv.innerText = 'Schon im Kampf!'; });
+            backToLobbyBtn.addEventListener('click', () => { if (inFight) endFight(false); else messageDiv.innerText = 'Schon in der Lobby.'; });
             upgradeHpBtn.addEventListener('click', upgradeHealth);
             upgradeDmgBtn.addEventListener('click', upgradeDamage);
-        }
 
-        // ========================================================================
-        //  START
-        // ========================================================================
-        function init() {
-            updateUI();
-            setupEventListeners();
             gameLoop();
         }
 
