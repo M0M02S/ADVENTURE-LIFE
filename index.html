@@ -3,424 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ADVENTURE-LIFE · Touch Edition</title>
+    <title>ADVENTURE-LIFE · Lobby & Kämpfe</title>
     <style>
         * {
             box-sizing: border-box;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
         }
         body {
-            margin: 0;
-            min-height: 100vh;
-            background: radial-gradient(circle at 20% 30%, #1e3b4a, #0f1f2a);
+            background: #1a2f3a;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             padding: 8px;
         }
         .game-wrapper {
             max-width: 1000px;
             width: 100%;
-            background: linear-gradient(145deg, #2b4a5e, #1a3340);
+            background: #2e4d5e;
             border-radius: 60px;
-            padding: 20px 15px 25px;
-            box-shadow: 0 30px 40px rgba(0,0,0,0.7), 0 0 0 3px #5d8ca0 inset;
-        }
-        .title {
-            text-align: center;
-            color: #ffdb7c;
-            font-size: 2.8rem;
-            font-weight: 800;
-            text-shadow: 0 6px 0 #9e7117, 0 10px 20px black;
-            letter-spacing: 4px;
-            margin-bottom: 15px;
-            word-break: break-word;
-        }
-        .canvas-container {
-            display: flex;
-            justify-content: center;
-            background: #10232e;
-            border-radius: 50px;
-            padding: 15px;
-            box-shadow: inset 0 0 0 4px #3d6377, 0 20px 30px -5px black;
+            padding: 20px;
+            box-shadow: 0 20px 30px black;
         }
         canvas {
+            display: block;
             width: 100%;
             aspect-ratio: 800/600;
-            display: block;
+            background: #3f6275;
             border-radius: 40px;
-            background: #1c3c4f;
-            touch-action: none;  /* Kein Scrollen/Pannen */
-            box-shadow: 0 0 0 3px #578196;
+            touch-action: none;
+            box-shadow: inset 0 0 0 4px #57879e, 0 15px 20px black;
         }
-        .stats-panel {
+        .ui-bar {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            background: #1e3f52;
+            background: #123845;
             padding: 15px 25px;
-            border-radius: 60px;
-            margin: 20px 0 15px;
-            border: 3px solid #6e9eb6;
-            box-shadow: 0 8px 0 #0e2632, inset 0 2px 8px #b0e0ff;
+            border-radius: 50px;
+            margin: 15px 0 10px;
+            border: 3px solid #5d96b0;
             color: white;
+            font-size: 1.4rem;
             font-weight: bold;
-            font-size: 1.2rem;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        .stat-item {
-            background: #0a1f2b;
-            padding: 8px 18px;
+        .stat-badge {
+            background: #06212b;
+            padding: 8px 25px;
             border-radius: 40px;
-            box-shadow: inset 0 -3px 0 #2d4d60;
-            color: #ffdb7c;
+            box-shadow: inset 0 -3px 0 #2d6577;
+            color: #f9d56e;
             display: flex;
             align-items: center;
-            gap: 6px;
-        }
-        .stat-item span {
-            color: white;
-            margin-right: 5px;
+            gap: 8px;
         }
         button {
-            background: #f9b83c;
+            background: #f3b33d;
             border: none;
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: bold;
             padding: 12px 30px;
-            border-radius: 50px;
-            box-shadow: 0 9px 0 #b36b00, 0 5px 15px black;
-            transition: 0.08s linear;
-            color: #2a1f00;
+            border-radius: 60px;
+            box-shadow: 0 8px 0 #9e691e;
+            transition: 0.05s linear;
+            color: #281d00;
             cursor: pointer;
-            font-family: inherit;
             touch-action: manipulation;
-            min-width: 140px;
+            min-width: 160px;
         }
         button:active {
-            transform: translateY(7px);
-            box-shadow: 0 2px 0 #b36b00;
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #9e691e;
         }
-        .message-area {
+        .upgrade-panel {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .upgrade-btn {
+            background: #4f7a92;
+            box-shadow: 0 8px 0 #2d4a5a;
+            color: white;
+            font-size: 1.2rem;
+            padding: 10px 25px;
+        }
+        .message {
             text-align: center;
-            color: #b4f0f0;
+            color: #b3f0f0;
             font-size: 1.6rem;
             font-weight: bold;
-            text-shadow: 0 3px 0 #005757;
-            margin: 10px 0 5px;
-            min-height: 3rem;
-        }
-        .joystick-hint {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            color: #9fc9e0;
-            font-size: 1rem;
-            margin: 10px 0 0;
-        }
-        .joystick-hint div {
-            background: #123845;
-            padding: 6px 20px;
-            border-radius: 30px;
-            border: 2px solid #4d889c;
+            text-shadow: 0 3px 0 #006c6c;
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
 <div class="game-wrapper">
-    <div class="title">ADVENTURE-LIFE</div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-    <div class="canvas-container">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="ui-bar">
+        <div class="stat-badge">❤️ <span id="hpDisplay">10/10</span></div>
+        <div class="stat-badge">⚔️ <span id="dmgDisplay">2</span></div>
+        <div class="stat-badge">🪙 <span id="goldDisplay">0</span></div>
     </div>
 
-    <div class="stats-panel">
-        <div class="stat-item"><span>❤️</span> <span id="healthDisplay">10/10</span></div>
-        <div class="stat-item"><span>⚔️</span> Lv.<span id="levelDisplay">1</span></div>
-        <div class="stat-item"><span>🔮</span> XP <span id="xpDisplay">0/10</span></div>
-        <div class="stat-item"><span>🏆</span> <span id="worldDisplay">Lobby</span></div>
+    <div id="lobbyControls" style="display: block;">
+        <div class="upgrade-panel">
+            <button class="upgrade-btn" id="upgradeHpBtn">❤️ Leben +2 (10🪙)</button>
+            <button class="upgrade-btn" id="upgradeDmgBtn">⚔️ Schaden +1 (8🪙)</button>
+        </div>
+        <div style="display: flex; justify-content: center;">
+            <button id="startFightBtn">⚔️ KAMPF STARTEN</button>
+        </div>
     </div>
 
-    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-        <button id="restartBtn">🔄 Neustart</button>
-        <button id="lobbyBtn">🏠 Zur Lobby</button>
+    <div id="fightControls" style="display: none;">
+        <div style="display: flex; gap: 20px; justify-content: center;">
+            <button id="backToLobbyBtn">🏠 ZURÜCK ZUR LOBBY</button>
+        </div>
     </div>
 
-    <div id="message" class="message-area">Willkommen in ADVENTURE-LIFE!</div>
-
-    <div class="joystick-hint">
-        <div>🕹️ Linke Seite = Bewegen (ziehen)</div>
-        <div>👆 Rechte Seite = Angriff (tippen)</div>
-    </div>
+    <div id="message" class="message">Willkommen in der Lobby!</div>
 </div>
 
 <script>
     (function() {
-        // ---------- KONFIGURATION ----------
-        const TILE_SIZE = 40;           // Jeder Block 40x40 Pixel
-        const PLAYER_SIZE = 30;          // Spielergröße
-        const MOB_SIZE = 30;
+        // ---------- SPIELKONFIGURATION ----------
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const hpSpan = document.getElementById('hpDisplay');
+        const dmgSpan = document.getElementById('dmgDisplay');
+        const goldSpan = document.getElementById('goldDisplay');
+        const messageDiv = document.getElementById('message');
+        const lobbyDiv = document.getElementById('lobbyControls');
+        const fightDiv = document.getElementById('fightControls');
 
-        // ---------- WELTDEFINITIONEN ----------
-        const lobbyMap = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ];
-
-        const world1Map = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
-            [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,1],
-            [1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ];
-
-        const world2Map = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1],
-            [1,0,1,1,1,0,0,1,0,0,0,0,1,0,0,1,1,1,0,1],
-            [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,0,1,1,1,0,0,1,1,0,0,1,1,1,0,1,0,1],
-            [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
-            [1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
-            [1,0,1,0,1,1,1,0,0,1,1,0,0,1,1,1,0,1,0,1],
-            [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ];
-
-        // ---------- GLOBALE VARIABLEN ----------
-        let canvas, ctx;
-        let gameRunning = true;
-
-        // Spieler
+        // Spielerwerte
         let player = {
-            x: 200, y: 200,
+            x: 400, y: 300,
             health: 10,
             maxHealth: 10,
-            level: 1,
-            xp: 0,
-            xpNeeded: 10,
-            attackCooldown: 0,
-            attackDamage: 2,
-            invincible: 0
+            damage: 2,
+            gold: 0,
+            invincible: 0,
+            attackTimer: 0       // für Angriffsanimation
         };
 
+        // Mobs
         let mobs = [];
-        let boss = null;
-        let currentWorld = 'lobby';
-        let worldMap = lobbyMap;
+        let mobId = 0;
 
-        // UI-Elemente
-        const healthDisplay = document.getElementById('healthDisplay');
-        const levelDisplay = document.getElementById('levelDisplay');
-        const xpDisplay = document.getElementById('xpDisplay');
-        const worldDisplay = document.getElementById('worldDisplay');
-        const messageDiv = document.getElementById('message');
+        // Spielzustand
+        let inFight = false;
+        let gameRunning = true;
 
-        // Joystick Variablen
-        let joystick = {
-            active: false,
-            startX: 0, startY: 0,        // Startposition in Canvas-Koordinaten
-            currentX: 0, currentY: 0,
-            dirX: 0, dirY: 0,             // Normalisierte Richtung (-1..1)
-            radius: 60,                    // Radius des Joysticks
-        };
+        // Joysticks
+        let moveJoystick = { active: false, startX: 0, startY: 0, currentX: 0, currentY: 0, dirX: 0, dirY: 0, radius: 70 };
+        let attackJoystick = { active: false, startX: 0, startY: 0, currentX: 0, currentY: 0, dirX: 0, dirY: 0, radius: 70 };
+
+        // Upgrade-Kosten
+        let hpUpgradeCost = 10;
+        let dmgUpgradeCost = 8;
 
         // ---------- INITIALISIERUNG ----------
-        function init() {
-            canvas = document.getElementById('gameCanvas');
-            ctx = canvas.getContext('2d');
-            resetGame();
-            setupEventListeners();
-            gameLoop();
-        }
-
-        function resetGame() {
-            player = {
-                x: 200, y: 200,
-                health: 10,
-                maxHealth: 10,
-                level: 1,
-                xp: 0,
-                xpNeeded: 10,
-                attackCooldown: 0,
-                attackDamage: 2,
-                invincible: 0
-            };
+        function resetFight() {
             mobs = [];
-            boss = null;
-            currentWorld = 'lobby';
-            worldMap = lobbyMap;
-            messageDiv.innerText = 'Willkommen in ADVENTURE-LIFE!';
-            updateUI();
-            spawnInitialMobs();
+            // 3 Mobs spawnen
+            for (let i = 0; i < 3; i++) {
+                spawnMob();
+            }
+            player.x = 400;
+            player.y = 300;
+            player.invincible = 0;
+            player.attackTimer = 0;
         }
 
-        function spawnInitialMobs() {
-            if (currentWorld === 'lobby') return;
-            if (currentWorld === 'world1') {
-                for (let i = 0; i < 3; i++) mobs.push(createMob());
-            }
-            if (currentWorld === 'world2') {
-                for (let i = 0; i < 5; i++) mobs.push(createMob(true));
-            }
-        }
-
-        function createMob(strong = false) {
+        function spawnMob() {
             let x, y;
             do {
-                x = Math.floor(Math.random() * 20) * TILE_SIZE + TILE_SIZE/2;
-                y = Math.floor(Math.random() * 15) * TILE_SIZE + TILE_SIZE/2;
-            } while (!isTileWalkable(x, y));
-            return {
+                x = 100 + Math.random() * 600;
+                y = 100 + Math.random() * 400;
+            } while (Math.hypot(x - player.x, y - player.y) < 80);
+            mobs.push({
+                id: mobId++,
                 x, y,
-                health: strong ? 8 : 4,
-                maxHealth: strong ? 8 : 4,
-                speed: 1,
-                damage: strong ? 2 : 1,
-                type: strong ? 'strong' : 'normal'
-            };
+                health: 5,
+                maxHealth: 5,
+                speed: 1.5,
+                damage: 1,
+                radius: 20
+            });
         }
 
-        // ---------- HILFSFUNKTIONEN ----------
-        function isTileWalkable(px, py) {
-            const col = Math.floor(px / TILE_SIZE);
-            const row = Math.floor(py / TILE_SIZE);
-            if (row < 0 || row >= 15 || col < 0 || col >= 20) return false;
-            const tile = worldMap[row][col];
-            return tile === 0;
-        }
-
-        function isTilePortal(px, py) {
-            const col = Math.floor(px / TILE_SIZE);
-            const row = Math.floor(py / TILE_SIZE);
-            if (row < 0 || row >= 15 || col < 0 || col >= 20) return false;
-            return worldMap[row][col] === 2;
-        }
-
-        // ---------- JOYSTICK-BEWEGUNG ----------
-        function updateJoystick() {
-            if (!joystick.active) return;
-
-            // Richtung aus aktuellem Vektor
-            let dx = joystick.currentX - joystick.startX;
-            let dy = joystick.currentY - joystick.startY;
+        // ---------- JOYSTICK-LOGIK ----------
+        function updateJoystick(js) {
+            if (!js.active) return;
+            let dx = js.currentX - js.startX;
+            let dy = js.currentY - js.startY;
             const dist = Math.hypot(dx, dy);
-            if (dist > joystick.radius) {
-                // Begrenzen auf Radius
-                dx = (dx / dist) * joystick.radius;
-                dy = (dy / dist) * joystick.radius;
-                joystick.currentX = joystick.startX + dx;
-                joystick.currentY = joystick.startY + dy;
+            if (dist > js.radius) {
+                dx = (dx / dist) * js.radius;
+                dy = (dy / dist) * js.radius;
+                js.currentX = js.startX + dx;
+                js.currentY = js.startY + dy;
             }
-            // Normierte Richtung (maximal 1)
-            const maxDist = joystick.radius;
-            joystick.dirX = dx / maxDist;
-            joystick.dirY = dy / maxDist;
+            js.dirX = dx / js.radius;
+            js.dirY = dy / js.radius;
         }
 
-        function applyJoystickMovement() {
-            if (!joystick.active || joystick.dirX === 0 && joystick.dirY === 0) return;
-
-            // Bewegungsgeschwindigkeit basierend auf joystick Auslenkung (bis zu 4 Pixel pro Frame)
-            const speed = 4;
-            let moveX = joystick.dirX * speed;
-            let moveY = joystick.dirY * speed;
-
-            // Kollisionserkennung (einfach)
-            let newX = player.x + moveX;
-            let newY = player.y + moveY;
-            if (canMoveTo(newX, player.y)) player.x = newX;
-            if (canMoveTo(player.x, newY)) player.y = newY;
-
-            // Portal-Check
-            if (isTilePortal(player.x, player.y)) {
-                enterPortal();
+        function applyMovement() {
+            if (!inFight) return;
+            if (moveJoystick.active && (moveJoystick.dirX !== 0 || moveJoystick.dirY !== 0)) {
+                const speed = 4;
+                let newX = player.x + moveJoystick.dirX * speed;
+                let newY = player.y + moveJoystick.dirY * speed;
+                // Begrenzung auf Canvas
+                newX = Math.max(25, Math.min(775, newX));
+                newY = Math.max(25, Math.min(575, newY));
+                player.x = newX;
+                player.y = newY;
             }
         }
 
-        function canMoveTo(x, y) {
-            const half = PLAYER_SIZE/2;
-            return (isTileWalkable(x - half, y - half) &&
-                    isTileWalkable(x + half, y - half) &&
-                    isTileWalkable(x - half, y + half) &&
-                    isTileWalkable(x + half, y + half));
-        }
+        function applyAttack() {
+            if (!inFight) return;
+            if (attackJoystick.active && (attackJoystick.dirX !== 0 || attackJoystick.dirY !== 0) && player.attackTimer <= 0) {
+                // Angriff ausführen
+                player.attackTimer = 15; // Dauer der Animation
+                const attackRange = 60;
+                const attackCenterX = player.x + attackJoystick.dirX * 30;
+                const attackCenterY = player.y + attackJoystick.dirY * 30;
 
-        function enterPortal() {
-            if (currentWorld === 'lobby') {
-                const col = Math.floor(player.x / TILE_SIZE);
-                const row = Math.floor(player.y / TILE_SIZE);
-                if (col === 7 && row === 4) changeWorld('world1');
-                else if (col === 12 && row === 4) changeWorld('world2');
-            } else {
-                changeWorld('lobby');
+                for (let mob of mobs) {
+                    const dist = Math.hypot(attackCenterX - mob.x, attackCenterY - mob.y);
+                    if (dist < attackRange) {
+                        mob.health -= player.damage;
+                        if (mob.health <= 0) {
+                            player.gold += 3;
+                        }
+                    }
+                }
+                // Mobs entfernen
+                mobs = mobs.filter(m => m.health > 0);
             }
-        }
-
-        function changeWorld(worldName) {
-            currentWorld = worldName;
-            mobs = [];
-            boss = null;
-            if (worldName === 'lobby') {
-                worldMap = lobbyMap;
-                messageDiv.innerText = 'Lobby – Gehe zu einem gelben Portal.';
-                player.x = 200; player.y = 200;
-            } else if (worldName === 'world1') {
-                worldMap = world1Map;
-                messageDiv.innerText = 'Welt 1 – Besiege alle Mobs!';
-                player.x = 200; player.y = 200;
-                spawnInitialMobs();
-            } else if (worldName === 'world2') {
-                worldMap = world2Map;
-                messageDiv.innerText = 'Welt 2 – Noch gefährlicher!';
-                player.x = 200; player.y = 200;
-                spawnInitialMobs();
-            }
-            updateUI();
         }
 
         // ---------- MOB-LOGIK ----------
         function updateMobs() {
-            for (let i = mobs.length - 1; i >= 0; i--) {
-                const mob = mobs[i];
-                if (mob.health <= 0) {
-                    mobs.splice(i, 1);
-                    player.xp += 2;
-                    checkLevelUp();
-                    continue;
-                }
+            if (!inFight) return;
+            for (let mob of mobs) {
                 // Bewegung zum Spieler
                 const dx = player.x - mob.x;
                 const dy = player.y - mob.y;
@@ -428,418 +267,394 @@
                 if (dist > 0) {
                     const moveX = (dx / dist) * mob.speed;
                     const moveY = (dy / dist) * mob.speed;
-                    let newX = mob.x + moveX;
-                    let newY = mob.y + moveY;
-                    if (isTileWalkable(newX, newY)) {
-                        mob.x = newX;
-                        mob.y = newY;
-                    }
+                    mob.x += moveX;
+                    mob.y += moveY;
                 }
-                // Angriff
-                if (dist < PLAYER_SIZE/2 + MOB_SIZE/2 + 5) {
+                // Kollision mit Spieler
+                if (dist < 35) { // Spielerradius ~20 + Mobradius 20
                     if (player.invincible <= 0) {
                         player.health -= mob.damage;
-                        player.invincible = 30;
+                        player.invincible = 40;
                         if (player.health < 0) player.health = 0;
-                        updateUI();
-                        if (player.health <= 0) gameOver();
                     }
                 }
             }
-
-            if (boss && boss.health > 0) {
-                const dx = player.x - boss.x;
-                const dy = player.y - boss.y;
-                const dist = Math.hypot(dx, dy);
-                if (dist > 0) {
-                    const moveX = (dx / dist) * 0.8;
-                    const moveY = (dy / dist) * 0.8;
-                    let newX = boss.x + moveX;
-                    let newY = boss.y + moveY;
-                    if (isTileWalkable(newX, newY)) {
-                        boss.x = newX;
-                        boss.y = newY;
-                    }
-                }
-                if (dist < PLAYER_SIZE/2 + 40) {
-                    if (player.invincible <= 0) {
-                        player.health -= 3;
-                        player.invincible = 30;
-                        updateUI();
-                        if (player.health <= 0) gameOver();
-                    }
-                }
-            } else if (boss && boss.health <= 0) {
-                messageDiv.innerText = 'Endgegner besiegt! Gehe zurück zum Portal.';
-                boss = null;
-                player.xp += 20;
-                checkLevelUp();
+            // Spieler tot?
+            if (player.health <= 0) {
+                messageDiv.innerText = '💀 Du bist gestorben! Zurück zur Lobby.';
+                endFight();
             }
-
-            // Boss erscheinen lassen
-            if (currentWorld !== 'lobby' && mobs.length === 0 && !boss) {
-                boss = {
-                    x: 400, y: 300,
-                    health: 30,
-                    maxHealth: 30,
-                    speed: 0.8,
-                    damage: 3
-                };
-                messageDiv.innerText = '⚠️ ENDGEGNER ERSCHIENEN! ⚠️';
+            // Alle Mobs tot?
+            if (mobs.length === 0) {
+                messageDiv.innerText = '🎉 Sieg! Zurück zur Lobby.';
+                endFight();
             }
         }
 
-        // ---------- ANGRIFF (per Tap auf rechter Seite) ----------
-        function handleAttackTap(clientX, clientY) {
-            if (player.attackCooldown > 0 || player.health <= 0) return;
-
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const canvasX = (clientX - rect.left) * scaleX;
-            const canvasY = (clientY - rect.top) * scaleY;
-
-            // Angriffsradius
-            const attackRange = 50;
-            let hit = false;
-
-            for (let mob of mobs) {
-                const dist = Math.hypot(canvasX - mob.x, canvasY - mob.y);
-                if (dist < attackRange) {
-                    mob.health -= player.attackDamage;
-                    hit = true;
-                }
-            }
-            if (boss) {
-                const dist = Math.hypot(canvasX - boss.x, canvasY - boss.y);
-                if (dist < attackRange) {
-                    boss.health -= player.attackDamage;
-                    hit = true;
-                }
-            }
-            if (hit) {
-                player.attackCooldown = 20; // ca. 0.3 sec
-            }
-        }
-
-        function checkLevelUp() {
-            while (player.xp >= player.xpNeeded) {
-                player.level++;
-                player.xp -= player.xpNeeded;
-                player.xpNeeded = Math.floor(player.xpNeeded * 1.5);
-                player.maxHealth += 2;
-                player.health = player.maxHealth;
-                player.attackDamage += 1;
-                messageDiv.innerText = `Level Up! Jetzt Level ${player.level}`;
-            }
+        function endFight() {
+            inFight = false;
+            lobbyDiv.style.display = 'block';
+            fightDiv.style.display = 'none';
+            moveJoystick.active = false;
+            attackJoystick.active = false;
             updateUI();
         }
 
+        // ---------- UPGRADES ----------
+        function buyHp() {
+            if (player.gold >= hpUpgradeCost) {
+                player.gold -= hpUpgradeCost;
+                player.maxHealth += 2;
+                player.health = player.maxHealth; // volles Leben
+                hpUpgradeCost = Math.floor(hpUpgradeCost * 1.5);
+                messageDiv.innerText = 'Leben erhöht!';
+                updateUI();
+            } else {
+                messageDiv.innerText = 'Nicht genug Gold!';
+            }
+        }
+
+        function buyDmg() {
+            if (player.gold >= dmgUpgradeCost) {
+                player.gold -= dmgUpgradeCost;
+                player.damage += 1;
+                dmgUpgradeCost = Math.floor(dmgUpgradeCost * 1.5);
+                messageDiv.innerText = 'Schaden erhöht!';
+                updateUI();
+            } else {
+                messageDiv.innerText = 'Nicht genug Gold!';
+            }
+        }
+
         function updateUI() {
-            healthDisplay.innerText = `${player.health}/${player.maxHealth}`;
-            levelDisplay.innerText = player.level;
-            xpDisplay.innerText = `${player.xp}/${player.xpNeeded}`;
-            let worldName = '🏠 Lobby';
-            if (currentWorld === 'world1') worldName = '🌲 Welt 1';
-            if (currentWorld === 'world2') worldName = '🕳️ Welt 2';
-            worldDisplay.innerText = worldName;
+            hpSpan.innerText = `${player.health}/${player.maxHealth}`;
+            dmgSpan.innerText = player.damage;
+            goldSpan.innerText = player.gold;
+            document.getElementById('upgradeHpBtn').innerText = `❤️ Leben +2 (${hpUpgradeCost}🪙)`;
+            document.getElementById('upgradeDmgBtn').innerText = `⚔️ Schaden +1 (${dmgUpgradeCost}🪙)`;
         }
 
-        function gameOver() {
-            messageDiv.innerText = '💀 GAME OVER 💀';
-            gameRunning = false;
-        }
-
-        // ---------- ZEICHNEN (aufgehübscht) ----------
-        function draw() {
-            ctx.clearRect(0, 0, 800, 600);
-
-            // Hintergrundmuster (leichter Schimmer)
-            ctx.fillStyle = '#1c3c4f';
+        // ---------- ZEICHNEN ----------
+        function drawLobby() {
+            ctx.fillStyle = '#2b5f7a';
             ctx.fillRect(0, 0, 800, 600);
+            ctx.font = 'bold 40px "Segoe UI"';
+            ctx.fillStyle = '#ffda7c';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 12;
+            ctx.fillText('🏠 LOBBY', 260, 150);
+            ctx.shadowBlur = 0;
+            // Zeichne dekorativen Spieler
+            drawPlayer(true);
+        }
 
-            // Tiles mit Schatten und Farbverlauf
-            for (let row = 0; row < 15; row++) {
-                for (let col = 0; col < 20; col++) {
-                    const tile = worldMap[row][col];
-                    let baseColor, lightColor;
-                    if (tile === 1) { // Wand
-                        baseColor = '#7a5a44';
-                        lightColor = '#9e7b60';
-                    } else if (tile === 2) { // Portal
-                        baseColor = '#f7d95c';
-                        lightColor = '#ffe380';
-                    } else { // Boden
-                        baseColor = '#5a8f8f';
-                        lightColor = '#7bb2b2';
-                    }
-
-                    // Farbverlauf für 3D-Effekt
-                    const gradient = ctx.createLinearGradient(
-                        col * TILE_SIZE, row * TILE_SIZE,
-                        (col+1)*TILE_SIZE, (row+1)*TILE_SIZE
-                    );
-                    gradient.addColorStop(0, lightColor);
-                    gradient.addColorStop(1, baseColor);
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE-1, TILE_SIZE-1);
-
-                    // Leichte Schattenkante
-                    ctx.strokeStyle = '#3f6377';
-                    ctx.lineWidth = 1.5;
-                    ctx.strokeRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                }
+        function drawFight() {
+            // Hintergrund
+            ctx.fillStyle = '#3f7a5c';
+            ctx.fillRect(0, 0, 800, 600);
+            // Gras-Muster (einfach)
+            ctx.fillStyle = '#5f9e7a';
+            for (let i = 0; i < 20; i++) {
+                ctx.fillRect(i*40, 0, 5, 600);
             }
 
-            // Mobs mit Glanzeffekt
+            // Mobs
             for (let mob of mobs) {
-                drawCreature(mob.x, mob.y, MOB_SIZE, mob.type === 'strong' ? '#d32f2f' : '#ff9800', mob.health/mob.maxHealth);
+                drawMob(mob);
             }
 
-            // Boss
-            if (boss) {
-                drawCreature(boss.x, boss.y, 60, '#8e24aa', boss.health/boss.maxHealth, true);
+            // Spieler
+            drawPlayer(false);
+
+            // Joysticks zeichnen (wenn aktiv)
+            if (moveJoystick.active) {
+                drawJoystick(moveJoystick, '#66aaff');
             }
-
-            // Spieler (mit Glanz)
-            drawPlayer();
-
-            // Cooldown-Anzeige
-            if (player.attackCooldown > 0) {
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(10, 10, 120, 18);
-                ctx.fillStyle = '#ffd966';
-                ctx.fillRect(10, 10, 120 * (1 - player.attackCooldown/20), 18);
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(10, 10, 120, 18);
-            }
-
-            // Joystick zeichnen (falls aktiv)
-            if (joystick.active) {
-                ctx.globalAlpha = 0.6;
-                ctx.beginPath();
-                ctx.arc(joystick.startX, joystick.startY, joystick.radius, 0, 2*Math.PI);
-                ctx.fillStyle = '#ffffff30';
-                ctx.fill();
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(joystick.currentX, joystick.currentY, 25, 0, 2*Math.PI);
-                ctx.fillStyle = '#fffdcc';
-                ctx.fill();
-                ctx.strokeStyle = '#ccaaff';
-                ctx.stroke();
-                ctx.globalAlpha = 1.0;
+            if (attackJoystick.active) {
+                drawJoystick(attackJoystick, '#ff6666');
             }
         }
 
-        function drawCreature(x, y, size, color, healthPercent, isBoss = false) {
+        function drawPlayer(inLobby) {
             // Schatten
             ctx.shadowColor = 'black';
             ctx.shadowBlur = 12;
             ctx.shadowOffsetX = 4;
             ctx.shadowOffsetY = 4;
 
-            // Körper
+            // Körper (Kreis)
             ctx.beginPath();
-            ctx.ellipse(x, y, size/2, size/2*0.8, 0, 0, 2*Math.PI);
-            ctx.fillStyle = color;
+            ctx.arc(player.x, player.y, 22, 0, 2 * Math.PI);
+            ctx.fillStyle = '#f9d56e';
             ctx.fill();
 
-            // Augen (niedlich)
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = 'white';
+            // Helm / Haare
             ctx.beginPath();
-            ctx.arc(x-6, y-6, 4, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x+6, y-6, 4, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#1f1f1f';
-            ctx.beginPath();
-            ctx.arc(x-7, y-7, 2, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x+5, y-7, 2, 0, 2*Math.PI);
-            ctx.fill();
-
-            // Gesundheitsbalken
-            ctx.shadowBlur = 4;
-            ctx.fillStyle = '#000000aa';
-            ctx.fillRect(x-25, y-35, 50, 8);
-            ctx.fillStyle = '#2ecc71';
-            ctx.fillRect(x-25, y-35, 50 * healthPercent, 8);
-
-            ctx.shadowBlur = 0;
-        }
-
-        function drawPlayer() {
-            ctx.shadowColor = 'black';
-            ctx.shadowBlur = 12;
-            ctx.shadowOffsetX = 4;
-            ctx.shadowOffsetY = 4;
-
-            // Körper
-            ctx.beginPath();
-            ctx.ellipse(player.x, player.y, PLAYER_SIZE/2, PLAYER_SIZE/2*0.8, 0, 0, 2*Math.PI);
-            ctx.fillStyle = '#4caf50';
-            ctx.fill();
-
-            // Rüstungsglanz
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#8bc34a';
-            ctx.beginPath();
-            ctx.ellipse(player.x-2, player.y-4, 6, 4, 0, 0, 2*Math.PI);
+            ctx.arc(player.x-5, player.y-12, 10, 0, Math.PI, true);
+            ctx.fillStyle = '#b58954';
             ctx.fill();
 
             // Augen
+            ctx.shadowBlur = 0;
             ctx.fillStyle = 'white';
             ctx.beginPath();
-            ctx.arc(player.x-7, player.y-7, 4, 0, 2*Math.PI);
+            ctx.arc(player.x-8, player.y-6, 4, 0, 2*Math.PI);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(player.x+7, player.y-7, 4, 0, 2*Math.PI);
+            ctx.arc(player.x+8, player.y-6, 4, 0, 2*Math.PI);
             ctx.fill();
             ctx.fillStyle = '#1f1f1f';
             ctx.beginPath();
-            ctx.arc(player.x-8, player.y-8, 2, 0, 2*Math.PI);
+            ctx.arc(player.x-9, player.y-7, 2, 0, 2*Math.PI);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(player.x+6, player.y-8, 2, 0, 2*Math.PI);
+            ctx.arc(player.x+7, player.y-7, 2, 0, 2*Math.PI);
             ctx.fill();
+
+            // Schild (links)
+            ctx.fillStyle = '#bf8f6f';
+            ctx.beginPath();
+            ctx.ellipse(player.x-20, player.y-2, 8, 12, 0, 0, 2*Math.PI);
+            ctx.fill();
+
+            // Schwert (rechts) – nur wenn nicht im Angriff
+            if (player.attackTimer <= 0 || inLobby) {
+                ctx.fillStyle = '#cccccc';
+                ctx.fillRect(player.x+15, player.y-12, 20, 5);
+                ctx.fillRect(player.x+30, player.y-17, 5, 15);
+            } else {
+                // Angriffsanimation: Schwert ausgestreckt
+                ctx.fillStyle = '#ffffaa';
+                ctx.fillRect(player.x+25, player.y-20, 30, 8);
+                ctx.fillRect(player.x+45, player.y-27, 8, 22);
+                player.attackTimer--;
+            }
 
             // Invincible-Effekt (blinken)
             if (player.invincible > 0) {
                 ctx.globalAlpha = 0.5;
                 ctx.beginPath();
-                ctx.arc(player.x, player.y, PLAYER_SIZE/2+4, 0, 2*Math.PI);
-                ctx.strokeStyle = 'yellow';
-                ctx.lineWidth = 4;
+                ctx.arc(player.x, player.y, 28, 0, 2*Math.PI);
+                ctx.strokeStyle = '#ffff88';
+                ctx.lineWidth = 5;
                 ctx.stroke();
                 ctx.globalAlpha = 1;
             }
             ctx.shadowBlur = 0;
         }
 
+        function drawMob(mob) {
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            ctx.beginPath();
+            ctx.arc(mob.x, mob.y, 20, 0, 2*Math.PI);
+            ctx.fillStyle = '#c44';
+            ctx.fill();
+            // Augen
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(mob.x-6, mob.y-5, 4, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(mob.x+6, mob.y-5, 4, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#222';
+            ctx.beginPath();
+            ctx.arc(mob.x-7, mob.y-6, 2, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(mob.x+5, mob.y-6, 2, 0, 2*Math.PI);
+            ctx.fill();
+            // Gesundheitsbalken
+            ctx.fillStyle = '#000000aa';
+            ctx.fillRect(mob.x-20, mob.y-30, 40, 6);
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(mob.x-20, mob.y-30, 40 * (mob.health/mob.maxHealth), 6);
+        }
+
+        function drawJoystick(js, color) {
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.arc(js.startX, js.startY, js.radius, 0, 2*Math.PI);
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.arc(js.currentX, js.currentY, 25, 0, 2*Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
         // ---------- GAMELOOP ----------
         function gameLoop() {
             if (!gameRunning) return;
 
-            if (player.attackCooldown > 0) player.attackCooldown--;
-            if (player.invincible > 0) player.invincible--;
+            if (inFight) {
+                if (player.invincible > 0) player.invincible--;
+                updateMobs();
+                applyMovement();
+                applyAttack();
+                drawFight();
+            } else {
+                drawLobby();
+            }
 
-            applyJoystickMovement();  // Bewegung per Joystick
-            updateMobs();
-
-            draw();
             requestAnimationFrame(gameLoop);
         }
 
-        // ---------- TOUCH-EVENT LISTENER ----------
-        function setupEventListeners() {
-            // Joystick Start (linke Hälfte)
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                const canvasX = (touch.clientX - rect.left) * (canvas.width / rect.width);
-                const canvasY = (touch.clientY - rect.top) * (canvas.height / rect.height);
-
-                // Linke Seite? (x < canvas.width/2)
-                if (canvasX < canvas.width / 2) {
-                    // Joystick starten
-                    joystick.active = true;
-                    joystick.startX = canvasX;
-                    joystick.startY = canvasY;
-                    joystick.currentX = canvasX;
-                    joystick.currentY = canvasY;
-                    joystick.dirX = 0; joystick.dirY = 0;
-                } else {
-                    // Rechte Seite -> Angriff
-                    handleAttackTap(touch.clientX, touch.clientY);
-                }
-            }, { passive: false });
-
-            canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                if (!joystick.active) return;
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                const canvasX = (touch.clientX - rect.left) * (canvas.width / rect.width);
-                const canvasY = (touch.clientY - rect.top) * (canvas.height / rect.height);
-                joystick.currentX = canvasX;
-                joystick.currentY = canvasY;
-                updateJoystick();
-            }, { passive: false });
-
-            canvas.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                joystick.active = false;
-            });
-
-            // Fallback für Maus (Testen am PC)
-            canvas.addEventListener('mousedown', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const canvasX = (e.clientX - rect.left) * (canvas.width / rect.width);
-                const canvasY = (e.clientY - rect.top) * (canvas.height / rect.height);
-                if (canvasX < canvas.width / 2) {
-                    joystick.active = true;
-                    joystick.startX = canvasX;
-                    joystick.startY = canvasY;
-                    joystick.currentX = canvasX;
-                    joystick.currentY = canvasY;
-                } else {
-                    playerAttackMouse(e.clientX, e.clientY);
-                }
-            });
-            canvas.addEventListener('mousemove', (e) => {
-                if (!joystick.active) return;
-                const rect = canvas.getBoundingClientRect();
-                const canvasX = (e.clientX - rect.left) * (canvas.width / rect.width);
-                const canvasY = (e.clientY - rect.top) * (canvas.height / rect.height);
-                joystick.currentX = canvasX;
-                joystick.currentY = canvasY;
-                updateJoystick();
-            });
-            canvas.addEventListener('mouseup', () => {
-                joystick.active = false;
-            });
-
-            // Buttons
-            document.getElementById('restartBtn').addEventListener('click', () => {
-                resetGame();
-                gameRunning = true;
-                gameLoop();
-            });
-            document.getElementById('lobbyBtn').addEventListener('click', () => {
-                changeWorld('lobby');
-            });
-        }
-
-        // Maus-Angriff für PC-Test
-        function playerAttackMouse(clientX, clientY) {
-            if (player.attackCooldown > 0 || player.health <= 0) return;
+        // ---------- TOUCH-EVENTS ----------
+        function handleTouchStart(e) {
+            e.preventDefault();
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
-            const canvasX = (clientX - rect.left) * scaleX;
-            const canvasY = (clientY - rect.top) * scaleY;
-            const attackRange = 50;
-            let hit = false;
-            for (let mob of mobs) {
-                const dist = Math.hypot(canvasX - mob.x, canvasY - mob.y);
-                if (dist < attackRange) { mob.health -= player.attackDamage; hit = true; }
+            for (let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
+                const canvasX = (touch.clientX - rect.left) * scaleX;
+                const canvasY = (touch.clientY - rect.top) * scaleY;
+
+                if (!inFight) return; // im Kampf brauchen wir Joysticks
+
+                // Linke Hälfte -> Bewegungs-Joystick
+                if (canvasX < canvas.width / 2) {
+                    moveJoystick.active = true;
+                    moveJoystick.startX = canvasX;
+                    moveJoystick.startY = canvasY;
+                    moveJoystick.currentX = canvasX;
+                    moveJoystick.currentY = canvasY;
+                    moveJoystick.dirX = 0;
+                    moveJoystick.dirY = 0;
+                } else {
+                    // Rechte Hälfte -> Angriffs-Joystick
+                    attackJoystick.active = true;
+                    attackJoystick.startX = canvasX;
+                    attackJoystick.startY = canvasY;
+                    attackJoystick.currentX = canvasX;
+                    attackJoystick.currentY = canvasY;
+                    attackJoystick.dirX = 0;
+                    attackJoystick.dirY = 0;
+                }
             }
-            if (boss) {
-                const dist = Math.hypot(canvasX - boss.x, canvasY - boss.y);
-                if (dist < attackRange) { boss.health -= player.attackDamage; hit = true; }
-            }
-            if (hit) player.attackCooldown = 20;
         }
 
-        init();
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            for (let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
+                const canvasX = (touch.clientX - rect.left) * scaleX;
+                const canvasY = (touch.clientY - rect.top) * scaleY;
+
+                if (moveJoystick.active) {
+                    moveJoystick.currentX = canvasX;
+                    moveJoystick.currentY = canvasY;
+                    updateJoystick(moveJoystick);
+                }
+                if (attackJoystick.active) {
+                    attackJoystick.currentX = canvasX;
+                    attackJoystick.currentY = canvasY;
+                    updateJoystick(attackJoystick);
+                }
+            }
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            moveJoystick.active = false;
+            attackJoystick.active = false;
+        }
+
+        // Maus-Fallback für PC
+        function handleMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const canvasX = (e.clientX - rect.left) * scaleX;
+            const canvasY = (e.clientY - rect.top) * scaleY;
+
+            if (!inFight) return;
+
+            if (canvasX < canvas.width / 2) {
+                moveJoystick.active = true;
+                moveJoystick.startX = canvasX;
+                moveJoystick.startY = canvasY;
+                moveJoystick.currentX = canvasX;
+                moveJoystick.currentY = canvasY;
+            } else {
+                attackJoystick.active = true;
+                attackJoystick.startX = canvasX;
+                attackJoystick.startY = canvasY;
+                attackJoystick.currentX = canvasX;
+                attackJoystick.currentY = canvasY;
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (!moveJoystick.active && !attackJoystick.active) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const canvasX = (e.clientX - rect.left) * scaleX;
+            const canvasY = (e.clientY - rect.top) * scaleY;
+
+            if (moveJoystick.active) {
+                moveJoystick.currentX = canvasX;
+                moveJoystick.currentY = canvasY;
+                updateJoystick(moveJoystick);
+            }
+            if (attackJoystick.active) {
+                attackJoystick.currentX = canvasX;
+                attackJoystick.currentY = canvasY;
+                updateJoystick(attackJoystick);
+            }
+        }
+
+        function handleMouseUp(e) {
+            moveJoystick.active = false;
+            attackJoystick.active = false;
+        }
+
+        // ---------- EVENT LISTENER ----------
+        function setupEvents() {
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd);
+            canvas.addEventListener('touchcancel', handleTouchEnd);
+
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+        }
+
+        // ---------- BUTTONS ----------
+        document.getElementById('startFightBtn').addEventListener('click', () => {
+            inFight = true;
+            lobbyDiv.style.display = 'none';
+            fightDiv.style.display = 'block';
+            resetFight();
+            messageDiv.innerText = 'Kampf! Bewegen (links), Angriff (rechts)';
+        });
+
+        document.getElementById('backToLobbyBtn').addEventListener('click', () => {
+            endFight();
+        });
+
+        document.getElementById('upgradeHpBtn').addEventListener('click', buyHp);
+        document.getElementById('upgradeDmgBtn').addEventListener('click', buyDmg);
+
+        // ---------- START ----------
+        setupEvents();
+        updateUI();
+        gameLoop();
     })();
 </script>
 </body>
