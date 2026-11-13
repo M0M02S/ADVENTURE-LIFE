@@ -37,7 +37,6 @@
     height: 100%;
   }
 
-  /* ---------- OVERLAYS ---------- */
   .overlay {
     position: absolute;
     inset: 0;
@@ -123,7 +122,6 @@
     border: 1px solid rgba(168, 240, 255, 0.25);
   }
 
-  /* ---------- HUD ---------- */
   #hud {
     position: absolute;
     inset: 0;
@@ -165,7 +163,6 @@
     -webkit-backdrop-filter: blur(8px);
   }
 
-  /* ---------- SCORE DISPLAY ---------- */
   .score-display {
     background: linear-gradient(180deg, rgba(77, 200, 255, 0.1), rgba(26, 140, 216, 0.05));
     border: 1px solid rgba(77, 200, 255, 0.35);
@@ -201,7 +198,6 @@
     font-weight: 800;
   }
 
-  /* ---------- INSTRUCTIONS ---------- */
   .instructions {
     margin-top: 32px;
     font-size: 14px;
@@ -227,7 +223,6 @@
     margin: 0 2px;
   }
 
-  /* ---------- MENU HIGHSCORE ---------- */
   .menu-highscore {
     margin-top: 24px;
     font-size: 14px;
@@ -236,7 +231,6 @@
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
   }
 
-  /* ---------- TUTORIAL HINT ---------- */
   #tutorialHint {
     position: absolute;
     left: 50%;
@@ -268,16 +262,13 @@
 <div id="game-container">
   <canvas id="game"></canvas>
 
-  <!-- HUD -->
   <div id="hud" class="hidden">
     <div id="score">0</div>
     <button id="pauseBtn" aria-label="Pause">⏸</button>
   </div>
 
-  <!-- TUTORIAL HINT -->
   <div id="tutorialHint"></div>
 
-  <!-- MENU -->
   <div id="menu" class="overlay">
     <h1 class="title">TIDAL</h1>
     <p class="subtitle">STEUERE DAS WASSER.<br>NICHT DAS BOOT.</p>
@@ -293,7 +284,6 @@
     </div>
   </div>
 
-  <!-- GAME OVER -->
   <div id="gameover" class="overlay hidden">
     <h2>GAME OVER</h2>
     <div class="score-display">
@@ -305,7 +295,6 @@
     <button id="menuBtn" class="secondary">MENÜ</button>
   </div>
 
-  <!-- PAUSE -->
   <div id="pause" class="overlay hidden">
     <h2 style="color:#d0faff; text-shadow: 0 0 30px rgba(77, 200, 255, 0.7);">PAUSE</h2>
     <button id="resumeBtn">WEITER</button>
@@ -316,13 +305,11 @@
 <script>
 // =============================================================
 //  TIDAL — Version 1.0
-//  Steuere das Wasser, nicht das Boot.
 // =============================================================
 
 (function () {
   'use strict';
 
-  // ---------- SETUP ----------
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const container = document.getElementById('game-container');
@@ -358,14 +345,12 @@
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
   window.addEventListener('resize', resize);
-  window.addEventListener('orientationchange', () => setTimeout(resize, 100));
+  window.addEventListener('orientationchange', function () { setTimeout(resize, 100); });
   resize();
 
-  // ---------- STATES ----------
   const STATE = { MENU: 'menu', PLAYING: 'playing', PAUSED: 'paused', GAMEOVER: 'gameover' };
   let state = STATE.MENU;
 
-  // ---------- GAME VARIABLES ----------
   let waterY = 0;
   let waterVel = 0;
   let holding = false;
@@ -377,11 +362,7 @@
   let screenShake = 0;
   let flashAlpha = 0;
 
-  const boat = {
-    x: 0,
-    y: 0,
-    angle: 0
-  };
+  const boat = { x: 0, y: 0, angle: 0 };
 
   let obstacles = [];
   let bubbles = [];
@@ -392,17 +373,15 @@
   let bubbleSpawnTimer = 0;
   let tutorialTimer = 0;
 
-  // Physics constants
   const WATER_RISE_ACCEL = -2000;
   const WATER_FALL_ACCEL = 1200;
-  const WATER_DAMPING_RATE = 1.5; // per second
+  const WATER_DAMPING_RATE = 1.5;
   const WATER_MAX_SPEED = 450;
   const BOAT_W = 56;
   const BOAT_H = 38;
 
   menuHighscoreEl.textContent = highscore;
 
-  // ---------- PARTICLE SYSTEM ----------
   function spawnParticle(x, y, vx, vy, opts) {
     opts = opts || {};
     if (particles.length > 260) return;
@@ -454,7 +433,6 @@
     }
   }
 
-  // ---------- OBSTACLES ----------
   function Obstacle(x, gapY, gapHeight) {
     this.x = x;
     this.gapY = gapY;
@@ -474,7 +452,6 @@
     obstacles.push(new Obstacle(W + 50, gapY, gapHeight));
   }
 
-  // ---------- BUBBLES ----------
   function spawnBubble(x, y) {
     bubbles.push({
       x: x, y: y, r: 11,
@@ -483,7 +460,6 @@
     });
   }
 
-  // ---------- INPUT ----------
   function pointerDown(e) {
     if (e && e.preventDefault) e.preventDefault();
     if (state === STATE.PLAYING) {
@@ -515,7 +491,9 @@
     }
   });
 
-  // ---------- GAME FLOW ----------
+  // =========================================================
+  //  GAME FLOW
+  // =========================================================
   function startGame() {
     state = STATE.PLAYING;
     gameTime = 0;
@@ -611,23 +589,22 @@
     floaters = [];
   }
 
-  // ---------- UPDATE ----------
+  // =========================================================
+  //  UPDATE
+  // =========================================================
   function update(dt) {
     if (dt > 0.05) dt = 0.05;
 
     if (state === STATE.PLAYING) {
       gameTime += dt;
 
-      // Tutorial hint fade
       if (tutorialTimer > 0) {
         tutorialTimer -= dt;
         if (tutorialTimer <= 0) tutorialHintEl.classList.remove('visible');
       }
 
-      // Difficulty scaling
       scrollSpeed = 260 + Math.min(distance * 0.55, 280);
 
-      // Water physics
       const accel = holding ? WATER_RISE_ACCEL : WATER_FALL_ACCEL;
       waterVel += accel * dt;
       const damping = Math.exp(-WATER_DAMPING_RATE * dt);
@@ -641,17 +618,14 @@
       if (waterY < minY) { waterY = minY; waterVel = Math.max(0, waterVel); }
       if (waterY > maxY) { waterY = maxY; waterVel = Math.min(0, waterVel); }
 
-      // Splash particles when moving fast
       if (Math.abs(waterVel) > 180 && Math.random() < 0.55) {
         spawnSplash(boat.x, waterY, Math.min(1, Math.abs(waterVel) / WATER_MAX_SPEED));
       }
 
-      // Boat follows water surface
       const bob = Math.sin(gameTime * 3.2) * 2.5;
       const targetY = waterY - BOAT_H * 0.4 + bob;
       boat.y += (targetY - boat.y) * Math.min(1, 16 * dt);
 
-      // Boat tilt based on water velocity
       let targetAngle = waterVel * 0.0009;
       if (targetAngle > 0.35) targetAngle = 0.35;
       if (targetAngle < -0.35) targetAngle = -0.35;
@@ -659,7 +633,6 @@
 
       distance += scrollSpeed * dt * 0.01;
 
-      // Spawn obstacles
       obstacleSpawnTimer -= dt;
       if (obstacleSpawnTimer <= 0) {
         spawnObstacle();
@@ -667,14 +640,12 @@
         obstacleSpawnTimer = baseInterval + Math.random() * 0.35;
       }
 
-      // Spawn bubbles
       bubbleSpawnTimer -= dt;
       if (bubbleSpawnTimer <= 0) {
         spawnBubble(W + 40, H * 0.12 + Math.random() * H * 0.76);
         bubbleSpawnTimer = 1.6 + Math.random() * 2.2;
       }
 
-      // Update obstacles
       for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
         obs.x -= scrollSpeed * dt;
@@ -688,7 +659,6 @@
         if (obs.x + obs.width < -60) obstacles.splice(i, 1);
       }
 
-      // Update bubbles
       for (let i = bubbles.length - 1; i >= 0; i--) {
         const b = bubbles[i];
         b.x -= scrollSpeed * dt;
@@ -714,7 +684,6 @@
         if (b.x < -60) bubbles.splice(i, 1);
       }
 
-      // Collision check
       const bt = boat.y - BOAT_H * 0.4;
       const bb = boat.y + BOAT_H * 0.4;
       const bl = boat.x - BOAT_W * 0.4;
@@ -731,7 +700,6 @@
       }
     }
 
-    // Particles (always)
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.life -= dt;
@@ -741,7 +709,6 @@
       p.y += p.vy * dt;
     }
 
-    // Floaters
     for (let i = floaters.length - 1; i >= 0; i--) {
       const f = floaters[i];
       f.life -= dt;
@@ -755,7 +722,6 @@
     if (flashAlpha > 0) flashAlpha -= dt * 1.5;
     if (flashAlpha < 0) flashAlpha = 0;
 
-    // Idle animation (menu / gameover)
     if (state === STATE.MENU || state === STATE.GAMEOVER) {
       gameTime += dt;
       waterY = H * 0.62;
@@ -764,7 +730,9 @@
     }
   }
 
-  // ---------- RENDER ----------
+  // =========================================================
+  //  RENDER
+  // =========================================================
   const ambientBubbles = [];
   for (let i = 0; i < 32; i++) {
     ambientBubbles.push({
@@ -786,7 +754,6 @@
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
 
-    // Stars
     for (let i = 0; i < 50; i++) {
       const sx = (i * 137.5 + gameTime * 4) % W;
       const sy = (i * 73.3) % (H * 0.72);
@@ -797,7 +764,6 @@
       ctx.fill();
     }
 
-    // Ambient bubbles
     for (let i = 0; i < ambientBubbles.length; i++) {
       const b = ambientBubbles[i];
       b.y -= b.speed * 0.016;
@@ -818,7 +784,6 @@
     const waveSpeed = gameTime * 2;
     const waveFreq = 0.008;
 
-    // Water body
     const grad = ctx.createLinearGradient(0, wy, 0, H);
     grad.addColorStop(0, 'rgba(50,160,230,0.80)');
     grad.addColorStop(0.25, 'rgba(25,105,195,0.88)');
@@ -839,7 +804,6 @@
     ctx.closePath();
     ctx.fill();
 
-    // Surface highlight
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     const surfGrad = ctx.createLinearGradient(0, wy - 14, 0, wy + 8);
@@ -866,11 +830,9 @@
   function drawPillar(x, y, w, h, hue, pulse, isTop) {
     if (h <= 0) return;
 
-    // Soft outer glow (cheap: wide semi-transparent rect)
     ctx.fillStyle = 'hsla(' + hue + ',100%,60%,' + (0.10 * pulse) + ')';
     ctx.fillRect(x - 6, y, w + 12, h);
 
-    // Main body
     const grad = ctx.createLinearGradient(x, 0, x + w, 0);
     grad.addColorStop(0, 'hsla(' + hue + ',70%,22%,0.95)');
     grad.addColorStop(0.3, 'hsla(' + hue + ',80%,38%,0.98)');
@@ -880,11 +842,9 @@
     ctx.fillStyle = grad;
     ctx.fillRect(x, y, w, h);
 
-    // Inner highlight line
     ctx.fillStyle = 'hsla(' + hue + ',100%,70%,' + (0.4 * pulse) + ')';
     ctx.fillRect(x + w * 0.5 - 1, y, 2, h);
 
-    // Bright cap at the gap side
     const capY = isTop ? y + h - 4 : y;
     const capGrad = ctx.createLinearGradient(x, capY, x, capY + 4);
     capGrad.addColorStop(0, 'hsla(' + hue + ',100%,78%,' + (0.9 * pulse) + ')');
@@ -892,12 +852,10 @@
     ctx.fillStyle = capGrad;
     ctx.fillRect(x, capY, w, 4);
 
-    // Edge outline
     ctx.strokeStyle = 'hsla(' + hue + ',100%,72%,' + (0.5 * pulse) + ')';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
 
-    // Texture lines
     ctx.strokeStyle = 'hsla(' + hue + ',100%,80%,0.12)';
     ctx.lineWidth = 1;
     for (let i = 1; i < 4; i++) {
@@ -912,4 +870,234 @@
   function drawObstacle(obs) {
     const pulse = Math.sin(obs.glowPulse) * 0.35 + 0.65;
     const bottomY = obs.gapY + obs.gapHeight;
-    drawPillar(obs.x, 0, obs.width, obs
+    drawPillar(obs.x, 0, obs.width, obs.gapY, obs.hue, pulse, true);
+    drawPillar(obs.x, bottomY, obs.width, H - bottomY, obs.hue, pulse, false);
+
+    // Gap glow
+    const gapGrad = ctx.createLinearGradient(obs.x, obs.gapY, obs.x, bottomY);
+    gapGrad.addColorStop(0, 'hsla(' + obs.hue + ',100%,70%,' + (0.06 * pulse) + ')');
+    gapGrad.addColorStop(0.5, 'hsla(' + obs.hue + ',100%,80%,' + (0.14 * pulse) + ')');
+    gapGrad.addColorStop(1, 'hsla(' + obs.hue + ',100%,70%,' + (0.06 * pulse) + ')');
+    ctx.fillStyle = gapGrad;
+    ctx.fillRect(obs.x, obs.gapY, obs.width, obs.gapHeight);
+  }
+
+  function drawBoat() {
+    ctx.save();
+    ctx.translate(boat.x, boat.y);
+    ctx.rotate(boat.angle);
+
+    // Wake / glow behind boat
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const glowGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 48);
+    glowGrad.addColorStop(0, 'rgba(168,240,255,0.35)');
+    glowGrad.addColorStop(1, 'rgba(168,240,255,0)');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 48, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Hull (boat bottom)
+    ctx.beginPath();
+    ctx.moveTo(-BOAT_W * 0.55, 0);
+    ctx.quadraticCurveTo(-BOAT_W * 0.55, BOAT_H * 0.55, 0, BOAT_H * 0.55);
+    ctx.quadraticCurveTo(BOAT_W * 0.55, BOAT_H * 0.55, BOAT_W * 0.55, 0);
+    ctx.closePath();
+    const hullGrad = ctx.createLinearGradient(0, 0, 0, BOAT_H * 0.55);
+    hullGrad.addColorStop(0, '#ffe6c2');
+    hullGrad.addColorStop(0.5, '#c97a2b');
+    hullGrad.addColorStop(1, '#6b3a12');
+    ctx.fillStyle = hullGrad;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,220,180,0.6)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Deck line
+    ctx.beginPath();
+    ctx.moveTo(-BOAT_W * 0.55, 0);
+    ctx.lineTo(BOAT_W * 0.55, 0);
+    ctx.strokeStyle = 'rgba(255,245,220,0.9)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Sail (triangle)
+    ctx.beginPath();
+    ctx.moveTo(0, -BOAT_H * 0.05);
+    ctx.lineTo(0, -BOAT_H * 1.35);
+    ctx.lineTo(BOAT_W * 0.42, -BOAT_H * 0.05);
+    ctx.closePath();
+    const sailGrad = ctx.createLinearGradient(0, -BOAT_H * 1.35, BOAT_W * 0.42, 0);
+    sailGrad.addColorStop(0, '#ffffff');
+    sailGrad.addColorStop(0.5, '#d8f4ff');
+    sailGrad.addColorStop(1, '#a8d8f0');
+    ctx.fillStyle = sailGrad;
+    ctx.shadowColor = 'rgba(168,240,255,0.7)';
+    ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Mast
+    ctx.beginPath();
+    ctx.moveTo(0, -BOAT_H * 0.05);
+    ctx.lineTo(0, -BOAT_H * 1.4);
+    ctx.strokeStyle = '#5a3a1a';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Flag
+    ctx.beginPath();
+    ctx.moveTo(0, -BOAT_H * 1.4);
+    ctx.lineTo(BOAT_W * 0.28, -BOAT_H * 1.28);
+    ctx.lineTo(0, -BOAT_H * 1.18);
+    ctx.closePath();
+    ctx.fillStyle = '#ff5757';
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawBubbles() {
+    for (let i = 0; i < bubbles.length; i++) {
+      const b = bubbles[i];
+      const px = b.x;
+      const py = b.y + Math.sin(b.bob) * 5;
+      const pulse = Math.sin(b.pulse) * 0.3 + 0.7;
+
+      // Outer glow
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const g = ctx.createRadialGradient(px, py, 2, px, py, b.r * 2.4);
+      g.addColorStop(0, 'rgba(255,215,0,' + (0.6 * pulse) + ')');
+      g.addColorStop(1, 'rgba(255,215,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(px, py, b.r * 2.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Bubble body
+      const bg = ctx.createRadialGradient(px - b.r * 0.35, py - b.r * 0.35, 1, px, py, b.r);
+      bg.addColorStop(0, 'rgba(255,255,220,1)');
+      bg.addColorStop(0.5, 'rgba(255,220,80,0.9)');
+      bg.addColorStop(1, 'rgba(230,160,0,0.75)');
+      ctx.fillStyle = bg;
+      ctx.beginPath();
+      ctx.arc(px, py, b.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.beginPath();
+      ctx.arc(px - b.r * 0.3, py - b.r * 0.3, b.r * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawParticles() {
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      const alpha = Math.max(0, p.life / p.maxLife);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawFloaters() {
+    ctx.textAlign = 'center';
+    ctx.font = '900 22px -apple-system, "Segoe UI", sans-serif';
+    for (let i = 0; i < floaters.length; i++) {
+      const f = floaters[i];
+      const alpha = Math.max(0, f.life / f.maxLife);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#ffd700';
+      ctx.shadowColor = 'rgba(255,215,0,0.9)';
+      ctx.shadowBlur = 12;
+      ctx.fillText(f.text, f.x, f.y);
+    }
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  }
+
+  function render() {
+    ctx.save();
+
+    // Screen shake
+    if (screenShake > 0) {
+      const sx = (Math.random() - 0.5) * screenShake;
+      const sy = (Math.random() - 0.5) * screenShake;
+      ctx.translate(sx, sy);
+    }
+
+    drawBackground();
+    drawWater();
+
+    for (let i = 0; i < obstacles.length; i++) drawObstacle(obstacles[i]);
+    drawBubbles();
+
+    if (state !== STATE.GAMEOVER) drawBoat();
+
+    drawParticles();
+    drawFloaters();
+
+    ctx.restore();
+
+    // Flash overlay
+    if (flashAlpha > 0) {
+      ctx.fillStyle = 'rgba(255,120,120,' + Math.min(1, flashAlpha) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  // =========================================================
+  //  GAME LOOP
+  // =========================================================
+  let lastTime = performance.now();
+
+  function loop(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+
+    if (state === STATE.PLAYING || state === STATE.MENU || state === STATE.GAMEOVER) {
+      update(dt);
+    } else {
+      // paused: still update idle animation (gentle bob)
+      gameTime += dt * 0.001;
+    }
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  // =========================================================
+  //  EVENT LISTENERS (Buttons!)
+  // =========================================================
+  playBtn.addEventListener('click', startGame);
+  retryBtn.addEventListener('click', startGame);
+  menuBtn.addEventListener('click', goToMenu);
+  pauseBtn.addEventListener('click', pauseGame);
+  resumeBtn.addEventListener('click', resumeGame);
+  quitBtn.addEventListener('click', goToMenu);
+
+  // Auto-pause when tab hidden
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state === STATE.PLAYING) pauseGame();
+  });
+
+  // =========================================================
+  //  INITIAL START
+  // =========================================================
+  resetIdleScene();
+  requestAnimationFrame(loop);
+
+  console.log('%c🌊 TIDAL v1.0 ready', 'color:#4dc8ff; font-weight:bold; font-size:14px;');
+
+})();
+</script>
+</body>
+</html>
