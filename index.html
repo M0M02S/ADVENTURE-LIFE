@@ -8,283 +8,136 @@
 <meta name="theme-color" content="#0a1128">
 <title>TIDAL</title>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #000;
+    width: 100%; height: 100%; overflow: hidden; background: #000;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    color: #fff;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: none;
-    overscroll-behavior: none;
+    color: #fff; user-select: none; -webkit-user-select: none;
+    touch-action: none; overscroll-behavior: none;
   }
-  #game-container {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-  }
-  canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
+  #game-container { position: fixed; inset: 0; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; }
   .overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     background: radial-gradient(circle at center, rgba(10, 30, 60, 0.85), rgba(5, 10, 25, 0.95));
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    z-index: 10;
-    padding: 24px;
-    transition: opacity 0.4s ease;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    z-index: 10; padding: 24px; transition: opacity 0.4s ease;
   }
-  .overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* ---------- SPRACHWAHL ---------- */
+  .overlay.hidden { opacity: 0; pointer-events: none; }
   #langBar {
-    position: absolute;
-    top: max(16px, env(safe-area-inset-top));
+    position: absolute; top: max(16px, env(safe-area-inset-top));
     right: max(16px, env(safe-area-inset-right));
-    display: flex;
-    gap: 8px;
-    z-index: 20;
+    display: flex; gap: 8px; z-index: 20;
   }
   .langBtn {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    padding: 0;
-    min-width: unset;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    background: rgba(255, 255, 255, 0.08);
-    color: #8ab4d8;
+    width: 42px; height: 42px; border-radius: 50%; padding: 0;
+    min-width: unset; font-size: 12px; font-weight: 800;
+    background: rgba(255, 255, 255, 0.08); color: #8ab4d8;
     border: 1.5px solid rgba(168, 240, 255, 0.25);
-    box-shadow: none;
-    margin: 0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    box-shadow: none; margin: 0; cursor: pointer;
+    transition: all 0.2s ease; display: flex;
+    align-items: center; justify-content: center;
   }
-  .langBtn:hover {
-    background: rgba(77, 200, 255, 0.2);
-    color: #d0faff;
-    transform: scale(1.05);
-  }
+  .langBtn:hover { background: rgba(77, 200, 255, 0.2); color: #d0faff; transform: scale(1.05); }
   .langBtn.active {
     background: linear-gradient(135deg, #4dc8ff 0%, #1a8cd8 100%);
-    color: #001a2e;
-    border-color: #4dc8ff;
+    color: #001a2e; border-color: #4dc8ff;
     box-shadow: 0 0 20px rgba(77, 200, 255, 0.7);
   }
-
   h1.title {
-    font-size: clamp(56px, 16vw, 130px);
-    font-weight: 900;
-    letter-spacing: 0.15em;
+    font-size: clamp(56px, 16vw, 130px); font-weight: 900; letter-spacing: 0.15em;
     background: linear-gradient(180deg, #d0faff 0%, #4dc8ff 40%, #1a6fd8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 30px rgba(77, 200, 255, 0.7));
-    margin-bottom: 6px;
-    animation: titlePulse 3s ease-in-out infinite;
+    margin-bottom: 6px; animation: titlePulse 3s ease-in-out infinite;
   }
   @keyframes titlePulse {
     0%, 100% { filter: drop-shadow(0 0 30px rgba(77, 200, 255, 0.7)); }
     50% { filter: drop-shadow(0 0 60px rgba(77, 200, 255, 1)); }
   }
-
   h2 {
-    font-size: clamp(32px, 9vw, 60px);
-    font-weight: 900;
-    letter-spacing: 0.1em;
-    color: #ff6b6b;
-    text-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
-    margin-bottom: 24px;
-    text-align: center;
+    font-size: clamp(32px, 9vw, 60px); font-weight: 900; letter-spacing: 0.1em;
+    color: #ff6b6b; text-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+    margin-bottom: 24px; text-align: center;
   }
-
   .subtitle {
-    font-size: clamp(13px, 3.6vw, 17px);
-    color: #8ab4d8;
-    margin-bottom: 40px;
-    letter-spacing: 0.15em;
-    text-align: center;
-    line-height: 1.6;
+    font-size: clamp(13px, 3.6vw, 17px); color: #8ab4d8; margin-bottom: 40px;
+    letter-spacing: 0.15em; text-align: center; line-height: 1.6;
   }
-
   button {
-    font-family: inherit;
-    font-size: clamp(16px, 4vw, 20px);
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    padding: 16px 48px;
-    border: none;
-    border-radius: 14px;
+    font-family: inherit; font-size: clamp(16px, 4vw, 20px); font-weight: 700;
+    letter-spacing: 0.2em; padding: 16px 48px; border: none; border-radius: 14px;
     background: linear-gradient(135deg, #4dc8ff 0%, #1a8cd8 100%);
-    color: #001a2e;
-    cursor: pointer;
+    color: #001a2e; cursor: pointer;
     box-shadow: 0 6px 30px rgba(77, 200, 255, 0.5), inset 0 1px 0 rgba(255,255,255,0.4);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
-    margin: 8px;
-    min-width: 180px;
+    margin: 8px; min-width: 180px;
   }
-  button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 50px rgba(77, 200, 255, 0.9), inset 0 1px 0 rgba(255,255,255,0.4);
-  }
+  button:hover { transform: scale(1.05); box-shadow: 0 8px 50px rgba(77, 200, 255, 0.9), inset 0 1px 0 rgba(255,255,255,0.4); }
   button:active { transform: scale(0.97); }
   button.secondary {
-    background: rgba(255, 255, 255, 0.08);
-    color: #cfe8ff;
+    background: rgba(255, 255, 255, 0.08); color: #cfe8ff;
     box-shadow: 0 4px 20px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255,255,255,0.1);
     border: 1px solid rgba(168, 240, 255, 0.25);
   }
-
   #hud {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 5;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 20px;
-    padding-top: max(20px, env(safe-area-inset-top));
+    position: absolute; inset: 0; pointer-events: none; z-index: 5;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 20px; padding-top: max(20px, env(safe-area-inset-top));
     padding-left: max(20px, env(safe-area-inset-left));
     padding-right: max(20px, env(safe-area-inset-right));
   }
   #hud.hidden { display: none; }
   #score {
-    font-size: clamp(32px, 8vw, 46px);
-    font-weight: 900;
-    color: #d0faff;
+    font-size: clamp(32px, 8vw, 46px); font-weight: 900; color: #d0faff;
     text-shadow: 0 0 24px rgba(77, 200, 255, 0.9), 0 0 8px rgba(77, 200, 255, 0.6);
-    letter-spacing: 0.05em;
-    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em; font-variant-numeric: tabular-nums;
   }
   #pauseBtn {
-    pointer-events: auto;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    padding: 0;
-    font-size: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: unset;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(168, 240, 255, 0.3);
-    color: #fff;
+    pointer-events: auto; width: 52px; height: 52px; border-radius: 50%;
+    padding: 0; font-size: 22px; display: flex; align-items: center; justify-content: center;
+    min-width: unset; background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(168, 240, 255, 0.3); color: #fff;
     box-shadow: 0 0 15px rgba(77, 200, 255, 0.3);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
-
   .score-display {
     background: linear-gradient(180deg, rgba(77, 200, 255, 0.1), rgba(26, 140, 216, 0.05));
-    border: 1px solid rgba(77, 200, 255, 0.35);
-    border-radius: 20px;
-    padding: 28px 48px;
-    margin-bottom: 24px;
-    text-align: center;
+    border: 1px solid rgba(77, 200, 255, 0.35); border-radius: 20px;
+    padding: 28px 48px; margin-bottom: 24px; text-align: center;
     box-shadow: 0 0 40px rgba(77, 200, 255, 0.15), inset 0 0 30px rgba(77, 200, 255, 0.05);
   }
   .score-label { font-size: 13px; color: #8ab4d8; letter-spacing: 0.4em; margin-bottom: 6px; }
   .score-value {
-    font-size: clamp(48px, 14vw, 72px);
-    font-weight: 900;
-    color: #d0faff;
-    text-shadow: 0 0 30px rgba(77, 200, 255, 0.9);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
+    font-size: clamp(48px, 14vw, 72px); font-weight: 900; color: #d0faff;
+    text-shadow: 0 0 30px rgba(77, 200, 255, 0.9); font-variant-numeric: tabular-nums; line-height: 1;
   }
   .highscore-label {
-    margin-top: 20px;
-    font-size: 13px;
-    color: #ffd700;
-    letter-spacing: 0.2em;
-    text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    margin-top: 20px; font-size: 13px; color: #ffd700;
+    letter-spacing: 0.2em; text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
   }
   .highscore-value { color: #ffd700; font-weight: 800; }
-
   .instructions {
-    margin-top: 32px;
-    font-size: 14px;
-    color: #8ab4d8;
-    text-align: center;
-    line-height: 1.9;
-    max-width: 440px;
-    padding: 20px;
+    margin-top: 32px; font-size: 14px; color: #8ab4d8; text-align: center;
+    line-height: 1.9; max-width: 440px; padding: 20px;
     border-top: 1px solid rgba(77, 200, 255, 0.15);
   }
   .instructions .gesture {
-    display: inline-block;
-    padding: 2px 10px;
-    background: rgba(77, 200, 255, 0.15);
-    border: 1px solid rgba(77, 200, 255, 0.4);
-    border-radius: 6px;
-    font-size: 12px;
-    color: #a8f0ff;
-    margin: 0 2px;
+    display: inline-block; padding: 2px 10px;
+    background: rgba(77, 200, 255, 0.15); border: 1px solid rgba(77, 200, 255, 0.4);
+    border-radius: 6px; font-size: 12px; color: #a8f0ff; margin: 0 2px;
   }
-  .super-line {
-    color: #ff80ff;
-    font-weight: 700;
-    margin-top: 10px;
-    text-shadow: 0 0 10px rgba(255, 128, 255, 0.5);
-  }
-
-  .menu-highscore {
-    margin-top: 24px;
-    font-size: 14px;
-    color: #ffd700;
-    letter-spacing: 0.15em;
-    text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
-  }
-
+  .super-line { color: #ff80ff; font-weight: 700; margin-top: 10px; text-shadow: 0 0 10px rgba(255, 128, 255, 0.5); }
+  .menu-highscore { margin-top: 24px; font-size: 14px; color: #ffd700; letter-spacing: 0.15em; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
   #tutorialHint {
-    position: absolute;
-    left: 50%;
-    bottom: 25%;
-    transform: translateX(-50%);
-    font-size: clamp(16px, 4vw, 20px);
-    font-weight: 700;
-    color: #d0faff;
-    letter-spacing: 0.15em;
-    text-shadow: 0 0 20px rgba(77, 200, 255, 0.9);
-    pointer-events: none;
-    z-index: 6;
-    opacity: 0;
-    transition: opacity 0.6s ease;
-    text-align: center;
-    white-space: nowrap;
+    position: absolute; left: 50%; bottom: 25%; transform: translateX(-50%);
+    font-size: clamp(16px, 4vw, 20px); font-weight: 700; color: #d0faff;
+    letter-spacing: 0.15em; text-shadow: 0 0 20px rgba(77, 200, 255, 0.9);
+    pointer-events: none; z-index: 6; opacity: 0; transition: opacity 0.6s ease;
+    text-align: center; white-space: nowrap;
   }
-  #tutorialHint.visible {
-    opacity: 1;
-    animation: hintPulse 1.4s ease-in-out infinite;
-  }
+  #tutorialHint.visible { opacity: 1; animation: hintPulse 1.4s ease-in-out infinite; }
   @keyframes hintPulse {
     0%, 100% { transform: translateX(-50%) scale(1); }
     50% { transform: translateX(-50%) scale(1.08); }
@@ -312,9 +165,7 @@
     <h1 class="title">TIDAL</h1>
     <p class="subtitle" id="menuSubtitle"></p>
     <button id="playBtn"></button>
-    <div class="menu-highscore">
-      <span id="menuHsLabel"></span>: <span id="menuHighscore">0</span>
-    </div>
+    <div class="menu-highscore"><span id="menuHsLabel"></span>: <span id="menuHighscore">0</span></div>
     <div class="instructions">
       <span class="gesture" id="holdBadge"></span> → <span id="riseText"></span><br>
       <span class="gesture" id="releaseBadge"></span> → <span id="fallText"></span><br><br>
@@ -343,8 +194,9 @@
 
 <script>
 // =============================================================
-//  TIDAL — Version 1.3
-//  Vollständiger Code | Sprachwahl | Bugfixes | Realistische Optik
+//  TIDAL — Version 1.4
+//  Bugfixes: Bubble-Spawn nur in Lücken | Boot direkt aufs
+//  Wasser | Richtungs-Partikel | Realistischeres Boot
 // =============================================================
 
 (function () {
@@ -356,75 +208,47 @@
   const translations = {
     de: {
       subtitle: "STEUERE DAS WASSER.<br>NICHT DAS BOOT.",
-      play: "▶ SPIELEN",
-      highscore: "HIGHSCORE",
-      hold: "GEDRÜCKT HALTEN",
-      release: "LOSLASSEN",
-      rise: "Wasser steigt",
-      fall: "Wasser sinkt",
+      play: "▶ SPIELEN", highscore: "HIGHSCORE",
+      hold: "GEDRÜCKT HALTEN", release: "LOSLASSEN",
+      rise: "Wasser steigt", fall: "Wasser sinkt",
       goal: "Manövriere dein Boot durch die Lücken.",
       super: "⭐ Regenbogen-Bubbles = +25 Punkte",
-      gameover: "GAME OVER",
-      points: "PUNKTE",
-      retry: "NOCHMAL",
-      menu: "MENÜ",
-      pause: "PAUSE",
-      continueBtn: "WEITER",
-      hint: "GEDRÜCKT HALTEN"
+      gameover: "GAME OVER", points: "PUNKTE",
+      retry: "NOCHMAL", menu: "MENÜ", pause: "PAUSE",
+      continueBtn: "WEITER", hint: "GEDRÜCKT HALTEN"
     },
     en: {
       subtitle: "CONTROL THE WATER.<br>NOT THE BOAT.",
-      play: "▶ PLAY",
-      highscore: "HIGHSCORE",
-      hold: "HOLD PRESSED",
-      release: "RELEASE",
-      rise: "water rises",
-      fall: "water falls",
+      play: "▶ PLAY", highscore: "HIGHSCORE",
+      hold: "HOLD PRESSED", release: "RELEASE",
+      rise: "water rises", fall: "water falls",
       goal: "Navigate your boat through the gaps.",
       super: "⭐ Rainbow bubbles = +25 points",
-      gameover: "GAME OVER",
-      points: "POINTS",
-      retry: "RETRY",
-      menu: "MENU",
-      pause: "PAUSE",
-      continueBtn: "CONTINUE",
-      hint: "HOLD PRESSED"
+      gameover: "GAME OVER", points: "POINTS",
+      retry: "RETRY", menu: "MENU", pause: "PAUSE",
+      continueBtn: "CONTINUE", hint: "HOLD PRESSED"
     },
     es: {
       subtitle: "CONTROLA EL AGUA.<br>NO EL BARCO.",
-      play: "▶ JUGAR",
-      highscore: "RÉCORD",
-      hold: "MANTÉN PULSADO",
-      release: "SUELTA",
-      rise: "el agua sube",
-      fall: "el agua baja",
+      play: "▶ JUGAR", highscore: "RÉCORD",
+      hold: "MANTÉN PULSADO", release: "SUELTA",
+      rise: "el agua sube", fall: "el agua baja",
       goal: "Navega tu barco por los huecos.",
       super: "⭐ Burbujas arcoíris = +25 puntos",
-      gameover: "FIN DEL JUEGO",
-      points: "PUNTOS",
-      retry: "OTRA VEZ",
-      menu: "MENÚ",
-      pause: "PAUSA",
-      continueBtn: "CONTINUAR",
-      hint: "MANTÉN PULSADO"
+      gameover: "FIN DEL JUEGO", points: "PUNTOS",
+      retry: "OTRA VEZ", menu: "MENÚ", pause: "PAUSA",
+      continueBtn: "CONTINUAR", hint: "MANTÉN PULSADO"
     },
     fr: {
       subtitle: "CONTRÔLE L'EAU.<br>PAS LE BATEAU.",
-      play: "▶ JOUER",
-      highscore: "RECORD",
-      hold: "MAINTENIR",
-      release: "RELÂCHER",
-      rise: "l'eau monte",
-      fall: "l'eau descend",
+      play: "▶ JOUER", highscore: "RECORD",
+      hold: "MAINTENIR", release: "RELÂCHER",
+      rise: "l'eau monte", fall: "l'eau descend",
       goal: "Navigue ton bateau entre les brèches.",
       super: "⭐ Bulles arc-en-ciel = +25 points",
-      gameover: "PARTIE TERMINÉE",
-      points: "POINTS",
-      retry: "REJOUER",
-      menu: "MENU",
-      pause: "PAUSE",
-      continueBtn: "CONTINUER",
-      hint: "MAINTENIR"
+      gameover: "PARTIE TERMINÉE", points: "POINTS",
+      retry: "REJOUER", menu: "MENU", pause: "PAUSE",
+      continueBtn: "CONTINUER", hint: "MAINTENIR"
     }
   };
 
@@ -436,7 +260,6 @@
     currentLang = lang;
     try { localStorage.setItem('tidal_lang', lang); } catch (e) {}
     const t = translations[lang];
-
     document.getElementById('menuSubtitle').innerHTML = t.subtitle;
     document.getElementById('playBtn').textContent = t.play;
     document.getElementById('menuHsLabel').textContent = t.highscore;
@@ -454,20 +277,14 @@
     document.getElementById('pauseTitle').textContent = t.pause;
     document.getElementById('resumeBtn').textContent = t.continueBtn;
     document.getElementById('quitBtn').textContent = t.menu;
-
     const langBtns = document.querySelectorAll('.langBtn');
     for (let i = 0; i < langBtns.length; i++) {
-      if (langBtns[i].dataset.lang === lang) {
-        langBtns[i].classList.add('active');
-      } else {
-        langBtns[i].classList.remove('active');
-      }
+      if (langBtns[i].dataset.lang === lang) langBtns[i].classList.add('active');
+      else langBtns[i].classList.remove('active');
     }
-
     document.documentElement.lang = lang;
   }
 
-  // Sprachbuttons
   const langBtns = document.querySelectorAll('.langBtn');
   for (let i = 0; i < langBtns.length; i++) {
     langBtns[i].addEventListener('click', function (e) {
@@ -501,12 +318,10 @@
   const quitBtn = document.getElementById('quitBtn');
 
   let W = 0, H = 0, DPR = 1;
-
   function resize() {
     const rect = container.getBoundingClientRect();
     DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = rect.width;
-    H = rect.height;
+    W = rect.width; H = rect.height;
     canvas.width = Math.floor(W * DPR);
     canvas.height = Math.floor(H * DPR);
     canvas.style.width = W + 'px';
@@ -520,27 +335,14 @@
   const STATE = { MENU: 'menu', PLAYING: 'playing', PAUSED: 'paused', GAMEOVER: 'gameover' };
   let state = STATE.MENU;
 
-  let waterY = 0;
-  let waterVel = 0;
-  let holding = false;
-  let gameTime = 0;
-  let scrollSpeed = 260;
-  let score = 0;
-  let distance = 0;
+  let waterY = 0, waterVel = 0, holding = false, gameTime = 0;
+  let scrollSpeed = 260, score = 0, distance = 0;
   let highscore = parseInt(localStorage.getItem('tidal_highscore') || '0', 10);
-  let screenShake = 0;
-  let flashAlpha = 0;
+  let screenShake = 0, flashAlpha = 0;
 
   const boat = { x: 0, y: 0, angle: 0 };
-
-  let obstacles = [];
-  let bubbles = [];
-  let particles = [];
-  let floaters = [];
-
-  let obstacleSpawnTimer = 0;
-  let bubbleSpawnTimer = 0;
-  let tutorialTimer = 0;
+  let obstacles = [], bubbles = [], particles = [], floaters = [];
+  let obstacleSpawnTimer = 0, bubbleSpawnTimer = 0, tutorialTimer = 0;
 
   const WATER_RISE_SPEED = 420;
   const WATER_FALL_SPEED = 320;
@@ -549,47 +351,71 @@
   const WATER_MAX_SPEED = 520;
   const BOAT_W = 56;
   const BOAT_H = 38;
-  const BOAT_FOLLOW_RATE = 18;
-  const BOAT_ANGLE_RATE = 11;
   const BUBBLE_RADIUS = 17;
   const SUPER_BUBBLE_RADIUS = 26;
   const SUPER_BUBBLE_CHANCE = 0.06;
+  // v1.4: Sicherheitsabstand zwischen Bubble und Wand
+  const BUBBLE_WALL_MARGIN = 40;
 
   menuHighscoreEl.textContent = highscore;
 
   // ============================================================
-  //  PARTIKEL
+  //  PARTIKEL-BASIS
   // ============================================================
   function spawnParticle(x, y, vx, vy, opts) {
     opts = opts || {};
-    if (particles.length > 320) return;
+    if (particles.length > 340) return;
     particles.push({
       x: x, y: y, vx: vx, vy: vy,
-      life: opts.life || 1,
-      maxLife: opts.life || 1,
+      life: opts.life || 1, maxLife: opts.life || 1,
       size: opts.size || 3,
       color: opts.color || 'rgba(168,240,255,0.8)',
       gravity: opts.gravity || 0
     });
   }
 
-  function spawnSplash(x, y, intensity) {
-    const count = Math.floor(intensity * 6);
+  // ============================================================
+  //  v1.4: RICHTUNGSABHÄNGIGER SPLASH
+  //  Steigen → Fontäne nach oben (Wasser wird verdrängt)
+  //  Sinken  → Gischt seitlich unten (Boot taucht ein)
+  // ============================================================
+  function spawnDirectionalSplash(x, y, intensity, rising) {
+    const count = Math.max(1, Math.floor(intensity * 9));
     for (let i = 0; i < count; i++) {
-      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.9;
-      const speed = 60 + Math.random() * 180 * intensity;
-      spawnParticle(
-        x + (Math.random() - 0.5) * BOAT_W,
-        y,
-        Math.cos(angle) * speed,
-        Math.sin(angle) * speed,
-        {
-          life: 0.55 + Math.random() * 0.4,
-          size: 1.5 + Math.random() * 2.5,
-          color: 'rgba(180,230,255,' + (0.5 + Math.random() * 0.4) + ')',
-          gravity: 380
-        }
-      );
+      if (rising) {
+        // Steigend: Sprühnebel nach oben und außen
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.9;
+        const speed = 90 + Math.random() * 220 * intensity;
+        spawnParticle(
+          x + (Math.random() - 0.5) * BOAT_W * 0.9,
+          y + 2 + Math.random() * 4,
+          Math.cos(angle) * speed,
+          Math.sin(angle) * speed,
+          {
+            life: 0.5 + Math.random() * 0.35,
+            size: 1.5 + Math.random() * 2.2,
+            color: 'rgba(210,245,255,' + (0.7 + Math.random() * 0.3) + ')',
+            gravity: 420
+          }
+        );
+      } else {
+        // Sinkend: Gischt seitlich und leicht nach unten
+        const side = Math.random() < 0.5 ? -1 : 1;
+        const angle = (side > 0 ? 0 : Math.PI) + (Math.random() - 0.5) * Math.PI * 0.55;
+        const speed = 70 + Math.random() * 170 * intensity;
+        spawnParticle(
+          x + side * BOAT_W * 0.42,
+          y + 3 + Math.random() * 5,
+          Math.cos(angle) * speed,
+          Math.sin(angle) * speed - 30,
+          {
+            life: 0.45 + Math.random() * 0.35,
+            size: 1.4 + Math.random() * 2.5,
+            color: 'rgba(190,235,255,' + (0.6 + Math.random() * 0.35) + ')',
+            gravity: 340
+          }
+        );
+      }
     }
   }
 
@@ -599,8 +425,7 @@
       const speed = 100 + Math.random() * 380;
       spawnParticle(
         x, y,
-        Math.cos(angle) * speed,
-        Math.sin(angle) * speed,
+        Math.cos(angle) * speed, Math.sin(angle) * speed,
         {
           life: 0.7 + Math.random() * 0.7,
           size: 3 + Math.random() * 4,
@@ -634,42 +459,44 @@
   }
 
   // ============================================================
-  //  BUBBLES — Bugfix: IMMER in die Mitte der Lücke
+  //  v1.4: BUBBLE SPWANT NUR MIT HINDERNIS IN REICHWEITE
+  //  → immer mittig in Lücke, immer sammelbar, nie in Wand
   // ============================================================
-  function spawnBubble(baseX, baseY) {
-    const isSuper = Math.random() < SUPER_BUBBLE_CHANCE;
-    const r = isSuper ? SUPER_BUBBLE_RADIUS : BUBBLE_RADIUS;
-    const safeBuffer = r + 22;
-    let x = baseX;
-    let y = baseY;
-
+  function spawnBubble(baseX) {
+    // Nächstes passendes Hindernis suchen
+    let targetObs = null;
+    let closestDist = Infinity;
     for (let i = 0; i < obstacles.length; i++) {
       const obs = obstacles[i];
-      // Bubble horizontal im Bereich dieses Hindernisses?
-      if (x + r + 8 < obs.x) continue;
-      if (x - r - 8 > obs.x + obs.width) continue;
-
-      const safeTop = obs.gapY + safeBuffer;
-      const safeBottom = obs.gapY + obs.gapHeight - safeBuffer;
-
-      if (safeTop >= safeBottom) return; // Lücke zu klein → Spawn abbrechen
-
-      // Immer MITTE der Lücke → nie in der Wand
-      y = (safeTop + safeBottom) / 2;
-      break;
+      // Nur Hindernisse in sinnvoller Reichweite
+      if (obs.x + obs.width < baseX - 60) continue; // schon vorbei
+      if (obs.x > baseX + 200) continue;            // zu weit weg
+      const dist = Math.abs(obs.x - baseX);
+      if (dist < closestDist) { closestDist = dist; targetObs = obs; }
     }
 
-    const screenMin = r + 12;
-    const screenMax = H - r - 12;
-    if (y < screenMin) y = screenMin;
-    if (y > screenMax) y = screenMax;
+    // Kein Hindernis → KEIN Bubble-Spawn (verhindert Bubbles an Wänden)
+    if (!targetObs) return false;
+
+    const isSuper = Math.random() < SUPER_BUBBLE_CHANCE;
+    const r = isSuper ? SUPER_BUBBLE_RADIUS : BUBBLE_RADIUS;
+
+    const safeTop = targetObs.gapY + r + BUBBLE_WALL_MARGIN;
+    const safeBottom = targetObs.gapY + targetObs.gapHeight - r - BUBBLE_WALL_MARGIN;
+
+    // Lücke zu klein → Spawn abbrechen
+    if (safeTop >= safeBottom) return false;
+
+    // Bubble MITTIG in der Lücke
+    const y = (safeTop + safeBottom) / 2;
 
     bubbles.push({
-      x: x, y: y, r: r, isSuper: isSuper,
+      x: baseX, y: y, r: r, isSuper: isSuper,
       bob: Math.random() * Math.PI * 2,
       pulse: Math.random() * Math.PI * 2,
       rotation: Math.random() * Math.PI * 2
     });
+    return true;
   }
 
   // ============================================================
@@ -677,10 +504,7 @@
   // ============================================================
   function pointerDown(e) {
     if (e && e.preventDefault) e.preventDefault();
-    if (state === STATE.PLAYING) {
-      if (!holding) spawnSplash(boat.x, waterY, 0.5);
-      holding = true;
-    }
+    if (state === STATE.PLAYING) holding = true;
   }
   function pointerUp(e) {
     if (e && e.preventDefault) e.preventDefault();
@@ -701,8 +525,7 @@
   });
   window.addEventListener('keyup', function (e) {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
-      holding = false;
-      e.preventDefault();
+      holding = false; e.preventDefault();
     }
   });
 
@@ -711,22 +534,12 @@
   // ============================================================
   function startGame() {
     state = STATE.PLAYING;
-    gameTime = 0;
-    score = 0;
-    distance = 0;
-    waterY = H * 0.5;
-    waterVel = 0;
-    holding = false;
+    gameTime = 0; score = 0; distance = 0;
+    waterY = H * 0.5; waterVel = 0; holding = false;
     scrollSpeed = 260;
-    obstacles = [];
-    bubbles = [];
-    particles = [];
-    floaters = [];
-    obstacleSpawnTimer = 1.3;
-    bubbleSpawnTimer = 1.2;
-    screenShake = 0;
-    flashAlpha = 0;
-    tutorialTimer = 2.6;
+    obstacles = []; bubbles = []; particles = []; floaters = [];
+    obstacleSpawnTimer = 1.3; bubbleSpawnTimer = 1.2;
+    screenShake = 0; flashAlpha = 0; tutorialTimer = 2.6;
 
     boat.x = Math.max(W * 0.22, 80);
     boat.y = waterY - BOAT_H * 0.4;
@@ -773,12 +586,10 @@
 
   function gameOver() {
     state = STATE.GAMEOVER;
-    screenShake = 22;
-    flashAlpha = 0.55;
+    screenShake = 22; flashAlpha = 0.55;
     spawnExplosion(boat.x, boat.y);
     holding = false;
     tutorialHintEl.classList.remove('visible');
-
     if (score > highscore) {
       highscore = score;
       try { localStorage.setItem('tidal_highscore', String(highscore)); } catch (e) {}
@@ -786,22 +597,17 @@
     finalScoreEl.textContent = score;
     finalHighscoreEl.textContent = highscore;
     hudEl.classList.add('hidden');
-
     setTimeout(function () {
       if (state === STATE.GAMEOVER) gameoverEl.classList.remove('hidden');
     }, 750);
   }
 
   function resetIdleScene() {
-    waterY = H * 0.62;
-    waterVel = 0;
+    waterY = H * 0.62; waterVel = 0;
     boat.x = Math.max(W * 0.22, 80);
     boat.y = waterY - BOAT_H * 0.4;
     boat.angle = 0;
-    particles = [];
-    obstacles = [];
-    bubbles = [];
-    floaters = [];
+    particles = []; obstacles = []; bubbles = []; floaters = [];
   }
 
   // ============================================================
@@ -812,7 +618,6 @@
 
     if (state === STATE.PLAYING) {
       gameTime += dt;
-
       if (tutorialTimer > 0) {
         tutorialTimer -= dt;
         if (tutorialTimer <= 0) tutorialHintEl.classList.remove('visible');
@@ -829,32 +634,30 @@
       if (waterVel < -WATER_MAX_SPEED) waterVel = -WATER_MAX_SPEED;
       waterY += waterVel * dt;
 
-      const minY = H * 0.08;
-      const maxY = H * 0.92;
-      if (waterY < minY) {
-        waterY = minY;
-        if (waterVel < 0) waterVel *= -0.35;
-      }
-      if (waterY > maxY) {
-        waterY = maxY;
-        if (waterVel > 0) waterVel *= -0.35;
-      }
+      const minY = H * 0.08, maxY = H * 0.92;
+      if (waterY < minY) { waterY = minY; if (waterVel < 0) waterVel *= -0.35; }
+      if (waterY > maxY) { waterY = maxY; if (waterVel > 0) waterVel *= -0.35; }
 
-      if (Math.abs(waterVel) > 180 && Math.random() < 0.5) {
-        spawnSplash(boat.x, waterY, Math.min(1, Math.abs(waterVel) / WATER_MAX_SPEED));
+      // v1.4: Richtungsabhängige Partikel
+      if (Math.abs(waterVel) > 140 && Math.random() < 0.65) {
+        const intensity = Math.min(1, Math.abs(waterVel) / WATER_MAX_SPEED);
+        spawnDirectionalSplash(boat.x, waterY, intensity, waterVel < 0);
       }
 
-      const bob = Math.sin(gameTime * 3.2) * 2.5 + Math.sin(gameTime * 5.7) * 1.1;
-      const targetY = waterY - BOAT_H * 0.4 + bob;
-      boat.y += (targetY - boat.y) * (1 - Math.exp(-BOAT_FOLLOW_RATE * dt));
+      // v1.4: BOOT DIREKT AUFS WASSER (kein Lag mehr!)
+      const bob = Math.sin(gameTime * 3.2) * 2.2 + Math.sin(gameTime * 5.7) * 0.9;
+      boat.y = waterY - BOAT_H * 0.4 + bob;
 
-      let targetAngle = waterVel * 0.0011;
+      // v1.4: Kleines Idle-Rock + Neigung nach Wasserbewegung
+      const idleRock = Math.sin(gameTime * 2.1) * 0.035;
+      let targetAngle = waterVel * 0.0011 + idleRock;
       if (targetAngle > 0.42) targetAngle = 0.42;
       if (targetAngle < -0.42) targetAngle = -0.42;
-      boat.angle += (targetAngle - boat.angle) * (1 - Math.exp(-BOAT_ANGLE_RATE * dt));
+      boat.angle += (targetAngle - boat.angle) * (1 - Math.exp(-11 * dt));
 
       distance += scrollSpeed * dt * 0.01;
 
+      // Hindernisse spawnen
       obstacleSpawnTimer -= dt;
       if (obstacleSpawnTimer <= 0) {
         spawnObstacle();
@@ -862,25 +665,28 @@
         obstacleSpawnTimer = baseInterval + Math.random() * 0.35;
       }
 
+      // v1.4: Bubble-Spawn nur bei Erfolg Timer zurücksetzen
       bubbleSpawnTimer -= dt;
       if (bubbleSpawnTimer <= 0) {
-        const spawnY = H * 0.12 + Math.random() * H * 0.76;
-        spawnBubble(W + 26, spawnY);
-        bubbleSpawnTimer = 1.6 + Math.random() * 2.2;
+        if (spawnBubble(W + 26)) {
+          bubbleSpawnTimer = 1.6 + Math.random() * 2.2;
+        } else {
+          bubbleSpawnTimer = 0.15; // gleich nochmal probieren
+        }
       }
 
+      // Hindernisse bewegen
       for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
         obs.x -= scrollSpeed * dt;
         obs.glowPulse += dt * 3;
         if (!obs.passed && obs.x + obs.width < boat.x - BOAT_W * 0.5) {
-          obs.passed = true;
-          score += 1;
-          scoreEl.textContent = score;
+          obs.passed = true; score += 1; scoreEl.textContent = score;
         }
         if (obs.x + obs.width < -60) obstacles.splice(i, 1);
       }
 
+      // Bubbles bewegen & einsammeln
       for (let i = bubbles.length - 1; i >= 0; i--) {
         const b = bubbles[i];
         b.x -= scrollSpeed * dt;
@@ -893,8 +699,7 @@
         const hitR = BOAT_W * 0.5 + b.r;
         if (dx * dx + dy * dy < hitR * hitR) {
           const pts = b.isSuper ? 25 : 5;
-          score += pts;
-          scoreEl.textContent = score;
+          score += pts; scoreEl.textContent = score;
 
           const particleColor = b.isSuper
             ? (Math.random() < 0.5 ? 'rgba(255,120,220,0.95)' : 'rgba(200,150,255,0.95)')
@@ -907,7 +712,6 @@
               life: 0.6, size: b.isSuper ? 4.5 : 3.5, color: particleColor, gravity: 0
             });
           }
-
           floaters.push({
             x: b.x, y: b.y, text: '+' + pts,
             life: 1, maxLife: 1, vy: -80,
@@ -920,11 +724,11 @@
         if (b.x < -60) bubbles.splice(i, 1);
       }
 
+      // Kollision
       const bt = boat.y - BOAT_H * 0.4;
       const bb = boat.y + BOAT_H * 0.4;
       const bl = boat.x - BOAT_W * 0.4;
       const br = boat.x + BOAT_W * 0.4;
-
       for (let i = 0; i < obstacles.length; i++) {
         const obs = obstacles[i];
         if (br > obs.x + 4 && bl < obs.x + obs.width - 4) {
@@ -936,6 +740,7 @@
       }
     }
 
+    // Partikel
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.life -= dt;
@@ -945,6 +750,7 @@
       p.y += p.vy * dt;
     }
 
+    // Floater
     for (let i = floaters.length - 1; i >= 0; i--) {
       const f = floaters[i];
       f.life -= dt;
@@ -961,7 +767,7 @@
     if (state === STATE.MENU || state === STATE.GAMEOVER) {
       gameTime += dt;
       waterY = H * 0.62;
-      boat.y = waterY - BOAT_H * 0.4 + Math.sin(gameTime * 1.5) * 4;
+      boat.y = waterY - BOAT_H * 0.4 + Math.sin(gameTime * 1.5) * 3;
       boat.angle = Math.sin(gameTime * 1.2) * 0.05;
     }
   }
@@ -1015,7 +821,7 @@
   }
 
   // ============================================================
-  //  RENDER — Wasser (realistisch, animiert)
+  //  RENDER — Wasser
   // ============================================================
   const foamParticles = [];
   for (let i = 0; i < 15; i++) {
@@ -1034,7 +840,6 @@
     const step = 3;
     const current = t * 32;
 
-    // ---- 5 überlagerte Wellen ----
     const wavePts = [];
     for (let x = 0; x <= W + step; x += step) {
       let y = wy;
@@ -1050,14 +855,11 @@
       ctx.beginPath();
       ctx.moveTo(0, H);
       ctx.lineTo(wavePts[0].x, wavePts[0].y);
-      for (let i = 1; i < wavePts.length; i++) {
-        ctx.lineTo(wavePts[i].x, wavePts[i].y);
-      }
+      for (let i = 1; i < wavePts.length; i++) ctx.lineTo(wavePts[i].x, wavePts[i].y);
       ctx.lineTo(wavePts[wavePts.length - 1].x, H);
       ctx.closePath();
     }
 
-    // ---- Wasser-Körper mit Tiefengradient ----
     const grad = ctx.createLinearGradient(0, wy - 30, 0, H);
     grad.addColorStop(0, 'rgba(95,200,250,0.65)');
     grad.addColorStop(0.10, 'rgba(50,160,230,0.82)');
@@ -1069,13 +871,11 @@
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // ---- Unterwasser-Effekte (geclippt) ----
     ctx.save();
     buildPath();
     ctx.clip();
     ctx.globalCompositeOperation = 'lighter';
 
-    // God Rays
     for (let i = 0; i < 6; i++) {
       const bx = ((i / 6) * W + Math.sin(t * 0.5 + i * 1.3) * 60 + W) % W;
       const rayW = 30 + Math.sin(t + i) * 15;
@@ -1092,7 +892,6 @@
       ctx.fill();
     }
 
-    // Kaustik-Blobs
     for (let i = 0; i < 8; i++) {
       const cx = ((i * 173 + t * 45) % (W + 200)) - 100;
       const baseY = wy + 40 + (i % 4) * 55;
@@ -1108,23 +907,19 @@
       ctx.fill();
     }
 
-    // Tiefen-Glow
     const deepGlow = ctx.createRadialGradient(W * 0.5, H, 0, W * 0.5, H, H * 0.85);
     deepGlow.addColorStop(0, 'rgba(0,70,200,0.32)');
     deepGlow.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = deepGlow;
     ctx.fillRect(0, wy, W, H - wy);
 
-    // Horizontale Tiefenlinien (Wasser-Schichtung)
     for (let i = 1; i < 5; i++) {
       const ly = wy + (H - wy) * (i / 5);
       ctx.fillStyle = 'rgba(80,160,230,' + (0.06 - i * 0.01) + ')';
       ctx.fillRect(0, ly + Math.sin(t * 1.5 + i) * 3, W, 2);
     }
-
     ctx.restore();
 
-    // ---- Oberflächen-Glow (3 Schichten) ----
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
@@ -1155,10 +950,8 @@
     ctx.strokeStyle = 'rgba(240,250,255,0.95)';
     ctx.lineWidth = 1.8;
     ctx.stroke();
-
     ctx.restore();
 
-    // ---- Schaum / Foam-Partikel auf Oberfläche ----
     for (let i = 0; i < foamParticles.length; i++) {
       const fp = foamParticles[i];
       const fx = ((fp.offset * W + t * 40 * fp.speed) % (W + 40)) - 20;
@@ -1170,7 +963,6 @@
       ctx.fill();
     }
 
-    // ---- Glitzer auf Oberfläche ----
     for (let i = 0; i < 30; i++) {
       const sx = ((i * 61 + t * 55) % W);
       const idx = Math.floor(sx / step);
@@ -1193,7 +985,6 @@
   // ============================================================
   function drawPillar(x, y, w, h, hue, pulse, isTop) {
     if (h <= 0) return;
-
     ctx.fillStyle = 'hsla(' + hue + ',100%,60%,' + (0.10 * pulse) + ')';
     ctx.fillRect(x - 6, y, w + 12, h);
 
@@ -1246,50 +1037,64 @@
   }
 
   // ============================================================
-  //  RENDER — Boot (realistisch)
+  //  v1.4: REALISTISCHES BOOT (komplett neu gestaltet)
+  //  - 4 Holzplanken mit Maserung
+  //  - Blauer Wasserlinien-Streifen
+  //  - Reling mit Wanten
+  //  - Kabine + glühendes Fenster
+  //  - 2 Segel (Großsegel + Stagsegel)
+  //  - Masttopp-Laterne
+  //  - Frachtkisten
+  //  - Wasserspiegelung + Kielwasser
   // ============================================================
   function drawBoat() {
     ctx.save();
     ctx.translate(boat.x, boat.y);
     ctx.rotate(boat.angle);
 
-    // Wasserspiegelung
+    const hullGrad = ctx.createLinearGradient(0, 0, 0, BOAT_H * 0.55);
+    hullGrad.addColorStop(0, '#e8b878');
+    hullGrad.addColorStop(0.3, '#c8822c');
+    hullGrad.addColorStop(0.65, '#8f4a18');
+    hullGrad.addColorStop(1, '#4a2208');
+
+    // Wasserspiegelung (unter Wasser)
     ctx.save();
-    ctx.globalAlpha = 0.25;
+    ctx.globalAlpha = 0.22;
     ctx.scale(1, -1);
-    ctx.translate(0, -BOAT_H * 0.15);
+    ctx.translate(0, -BOAT_H * 0.12);
     ctx.beginPath();
     ctx.moveTo(-BOAT_W * 0.55, 0);
     ctx.quadraticCurveTo(-BOAT_W * 0.55, BOAT_H * 0.55, 0, BOAT_H * 0.55);
     ctx.quadraticCurveTo(BOAT_W * 0.55, BOAT_H * 0.55, BOAT_W * 0.55, 0);
     ctx.closePath();
-    ctx.fillStyle = '#c97a2b';
+    ctx.fillStyle = '#7a3a10';
     ctx.fill();
     ctx.restore();
 
     // Glow
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    const glowGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 52);
-    glowGrad.addColorStop(0, 'rgba(168,240,255,0.35)');
+    const glowGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 55);
+    glowGrad.addColorStop(0, 'rgba(168,240,255,0.32)');
     glowGrad.addColorStop(1, 'rgba(168,240,255,0)');
     ctx.fillStyle = glowGrad;
     ctx.beginPath();
-    ctx.arc(0, 0, 52, 0, Math.PI * 2);
+    ctx.arc(0, 0, 55, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
     // Kielwasser
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    const wakeGrad = ctx.createLinearGradient(-BOAT_W * 0.7, 0, -BOAT_W * 1.6, 0);
-    wakeGrad.addColorStop(0, 'rgba(200,240,255,0.45)');
+    const wakeGrad = ctx.createLinearGradient(-BOAT_W * 0.7, 0, -BOAT_W * 1.8, 0);
+    wakeGrad.addColorStop(0, 'rgba(200,240,255,0.5)');
     wakeGrad.addColorStop(1, 'rgba(200,240,255,0)');
     ctx.fillStyle = wakeGrad;
     ctx.beginPath();
     ctx.moveTo(-BOAT_W * 0.55, 0);
-    ctx.lineTo(-BOAT_W * 1.6, -BOAT_H * 0.35);
-    ctx.lineTo(-BOAT_W * 1.6, BOAT_H * 0.5);
+    ctx.lineTo(-BOAT_W * 1.8, -BOAT_H * 0.4);
+    ctx.lineTo(-BOAT_W * 1.8, BOAT_H * 0.6);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
@@ -1300,141 +1105,231 @@
     ctx.quadraticCurveTo(-BOAT_W * 0.55, BOAT_H * 0.55, 0, BOAT_H * 0.55);
     ctx.quadraticCurveTo(BOAT_W * 0.55, BOAT_H * 0.55, BOAT_W * 0.55, 0);
     ctx.closePath();
-    const hullGrad = ctx.createLinearGradient(0, 0, 0, BOAT_H * 0.55);
-    hullGrad.addColorStop(0, '#ffe0b3');
-    hullGrad.addColorStop(0.35, '#d8883a');
-    hullGrad.addColorStop(0.75, '#a55a1f');
-    hullGrad.addColorStop(1, '#5a2e0a');
     ctx.fillStyle = hullGrad;
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255,220,180,0.7)';
+    ctx.strokeStyle = 'rgba(255,220,180,0.75)';
     ctx.lineWidth = 1.3;
     ctx.stroke();
 
-    // Holzplanken
-    ctx.strokeStyle = 'rgba(80,40,10,0.5)';
-    ctx.lineWidth = 0.8;
-    for (let i = 1; i < 3; i++) {
-      const py = (BOAT_H * 0.55) * (i / 3);
+    // Holzplanken (4 Linien mit Maserung)
+    for (let i = 1; i <= 3; i++) {
+      const py = (BOAT_H * 0.55) * (i / 4);
+      ctx.strokeStyle = 'rgba(60,30,10,0.55)';
+      ctx.lineWidth = 0.9;
       ctx.beginPath();
       ctx.moveTo(-BOAT_W * 0.5, py);
-      ctx.quadraticCurveTo(0, py + 2, BOAT_W * 0.5, py);
+      ctx.quadraticCurveTo(-BOAT_W * 0.1, py + 2, 0, py + 1.5);
+      ctx.quadraticCurveTo(BOAT_W * 0.1, py + 2, BOAT_W * 0.5, py);
       ctx.stroke();
     }
+
+    // Maserung (kurze Striche)
+    ctx.strokeStyle = 'rgba(80,40,10,0.35)';
+    ctx.lineWidth = 0.6;
+    for (let i = 0; i < 5; i++) {
+      const my = 4 + i * 3.5;
+      ctx.beginPath();
+      ctx.moveTo(-BOAT_W * 0.4 + i * 5, my);
+      ctx.lineTo(-BOAT_W * 0.4 + i * 5 + 8, my + 0.5);
+      ctx.stroke();
+    }
+
+    // Wasserlinien-Streifen (blau)
+    ctx.fillStyle = 'rgba(50,120,200,0.7)';
+    ctx.fillRect(-BOAT_W * 0.52, 0, BOAT_W * 1.04, 2.5);
 
     // Deck-Linie
     ctx.beginPath();
     ctx.moveTo(-BOAT_W * 0.55, 0);
     ctx.lineTo(BOAT_W * 0.55, 0);
     ctx.strokeStyle = 'rgba(255,245,220,0.95)';
-    ctx.lineWidth = 2.2;
+    ctx.lineWidth = 2.3;
+    ctx.stroke();
+
+    // Reling (Wanten)
+    ctx.strokeStyle = 'rgba(90,55,25,0.9)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-BOAT_W * 0.5, -2);
+    ctx.lineTo(BOAT_W * 0.5, -2);
+    ctx.stroke();
+    // Wanten-Stützen
+    for (let i = 0; i < 5; i++) {
+      const px = -BOAT_W * 0.4 + i * (BOAT_W * 0.8 / 4);
+      ctx.beginPath();
+      ctx.moveTo(px, -2);
+      ctx.lineTo(px, 0);
+      ctx.stroke();
+    }
+
+    // Frachtkisten auf Deck
+    ctx.fillStyle = '#6b3a12';
+    ctx.fillRect(-BOAT_W * 0.42, -10, 8, 8);
+    ctx.strokeStyle = '#3a1e05';
+    ctx.lineWidth = 0.7;
+    ctx.strokeRect(-BOAT_W * 0.42, -10, 8, 8);
+    ctx.beginPath();
+    ctx.moveTo(-BOAT_W * 0.42, -6); ctx.lineTo(-BOAT_W * 0.42 + 8, -6);
+    ctx.moveTo(-BOAT_W * 0.42 + 4, -10); ctx.lineTo(-BOAT_W * 0.42 + 4, -2);
+    ctx.stroke();
+
+    // Fass
+    ctx.fillStyle = '#8a4a1a';
+    ctx.beginPath();
+    ctx.ellipse(-BOAT_W * 0.28, -6, 4, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#3a1e05';
     ctx.stroke();
 
     // Kabine
     ctx.beginPath();
-    ctx.moveTo(-BOAT_W * 0.28, -BOAT_H * 0.05);
-    ctx.lineTo(-BOAT_W * 0.28, -BOAT_H * 0.5);
-    ctx.lineTo(BOAT_W * 0.02, -BOAT_H * 0.5);
-    ctx.lineTo(BOAT_W * 0.02, -BOAT_H * 0.05);
+    ctx.moveTo(-BOAT_W * 0.1, 0);
+    ctx.lineTo(-BOAT_W * 0.1, -BOAT_H * 0.42);
+    ctx.lineTo(BOAT_W * 0.15, -BOAT_H * 0.42);
+    ctx.lineTo(BOAT_W * 0.15, 0);
     ctx.closePath();
-    const cabGrad = ctx.createLinearGradient(-BOAT_W * 0.28, -BOAT_H * 0.5, BOAT_W * 0.02, -BOAT_H * 0.05);
-    cabGrad.addColorStop(0, '#8a5520');
-    cabGrad.addColorStop(0.5, '#b87630');
+    const cabGrad = ctx.createLinearGradient(-BOAT_W * 0.1, -BOAT_H * 0.42, BOAT_W * 0.15, 0);
+    cabGrad.addColorStop(0, '#a86824');
+    cabGrad.addColorStop(0.5, '#d18a3a');
     cabGrad.addColorStop(1, '#5a3010');
     ctx.fillStyle = cabGrad;
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255,220,180,0.55)';
+    ctx.strokeStyle = 'rgba(255,220,180,0.6)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
     // Kabinenfenster (glüht)
-    ctx.fillStyle = 'rgba(255,240,150,0.95)';
-    ctx.shadowColor = 'rgba(255,220,100,0.9)';
-    ctx.shadowBlur = 10;
-    ctx.fillRect(-BOAT_W * 0.22, -BOAT_H * 0.42, BOAT_W * 0.16, BOAT_H * 0.16);
+    ctx.fillStyle = 'rgba(255,240,150,1)';
+    ctx.shadowColor = 'rgba(255,220,100,0.95)';
+    ctx.shadowBlur = 12;
+    ctx.fillRect(-BOAT_W * 0.06, -BOAT_H * 0.34, BOAT_W * 0.16, BOAT_H * 0.16);
     ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(180,120,40,0.9)';
+    ctx.lineWidth = 0.8;
+    ctx.strokeRect(-BOAT_W * 0.06, -BOAT_H * 0.34, BOAT_W * 0.16, BOAT_H * 0.16);
 
     // Mast
     ctx.beginPath();
-    ctx.moveTo(BOAT_W * 0.12, -BOAT_H * 0.05);
-    ctx.lineTo(BOAT_W * 0.12, -BOAT_H * 1.45);
+    ctx.moveTo(BOAT_W * 0.22, 0);
+    ctx.lineTo(BOAT_W * 0.22, -BOAT_H * 1.55);
     ctx.strokeStyle = '#5a3a1a';
-    ctx.lineWidth = 2.3;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // Segel (gebläht)
+    // Mast-Ring
     ctx.beginPath();
-    ctx.moveTo(BOAT_W * 0.12, -BOAT_H * 0.1);
-    ctx.quadraticCurveTo(BOAT_W * 0.62, -BOAT_H * 0.7, BOAT_W * 0.5, -BOAT_H * 1.35);
-    ctx.lineTo(BOAT_W * 0.12, -BOAT_H * 1.4);
+    ctx.arc(BOAT_W * 0.22, -BOAT_H * 0.8, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#3a1e05';
+    ctx.fill();
+
+    // Stagsegel (vorne, kleiner)
+    ctx.beginPath();
+    ctx.moveTo(BOAT_W * 0.22, -BOAT_H * 1.3);
+    ctx.quadraticCurveTo(BOAT_W * 0.42, -BOAT_H * 0.9, BOAT_W * 0.62, -BOAT_H * 0.5);
+    ctx.lineTo(BOAT_W * 0.55, -BOAT_H * 0.05);
     ctx.closePath();
-    const sailGrad = ctx.createLinearGradient(BOAT_W * 0.12, -BOAT_H * 1.4, BOAT_W * 0.5, 0);
+    const jibGrad = ctx.createLinearGradient(BOAT_W * 0.22, -BOAT_H * 1.3, BOAT_W * 0.62, -BOAT_H * 0.5);
+    jibGrad.addColorStop(0, '#f0f8ff');
+    jibGrad.addColorStop(1, '#a8d4ec');
+    ctx.fillStyle = jibGrad;
+    ctx.shadowColor = 'rgba(168,240,255,0.6)';
+    ctx.shadowBlur = 10;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(200,230,250,0.5)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+
+    // Großsegel (gebläht)
+    ctx.beginPath();
+    ctx.moveTo(BOAT_W * 0.22, -BOAT_H * 0.15);
+    ctx.quadraticCurveTo(-BOAT_W * 0.05, -BOAT_H * 0.75, BOAT_W * 0.05, -BOAT_H * 1.42);
+    ctx.lineTo(BOAT_W * 0.22, -BOAT_H * 1.5);
+    ctx.closePath();
+    const sailGrad = ctx.createLinearGradient(BOAT_W * 0.22, -BOAT_H * 1.5, 0, 0);
     sailGrad.addColorStop(0, '#ffffff');
-    sailGrad.addColorStop(0.5, '#e0f4ff');
-    sailGrad.addColorStop(1, '#a8d8f0');
+    sailGrad.addColorStop(0.45, '#e4f4ff');
+    sailGrad.addColorStop(1, '#a0cce4');
     ctx.fillStyle = sailGrad;
     ctx.shadowColor = 'rgba(168,240,255,0.7)';
     ctx.shadowBlur = 12;
     ctx.fill();
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-    ctx.lineWidth = 0.8;
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = 0.9;
     ctx.stroke();
 
     // Segelnähte
-    ctx.strokeStyle = 'rgba(180,210,230,0.4)';
-    ctx.lineWidth = 0.7;
+    ctx.strokeStyle = 'rgba(160,200,225,0.45)';
+    ctx.lineWidth = 0.6;
     for (let i = 1; i < 3; i++) {
-      const ty = -BOAT_H * (0.4 + i * 0.28);
+      const sy = -BOAT_H * (0.35 + i * 0.35);
       ctx.beginPath();
-      ctx.moveTo(BOAT_W * 0.12, ty);
-      ctx.quadraticCurveTo(BOAT_W * 0.4, ty - 3, BOAT_W * 0.46, ty);
+      ctx.moveTo(BOAT_W * 0.21, sy);
+      ctx.quadraticCurveTo(BOAT_W * 0.12, sy - 2, BOAT_W * 0.04, sy);
       ctx.stroke();
     }
 
-    // Rigging-Leinen
+    // Rigging
     ctx.strokeStyle = 'rgba(90,60,30,0.7)';
     ctx.lineWidth = 0.8;
     ctx.beginPath();
-    ctx.moveTo(BOAT_W * 0.12, -BOAT_H * 1.42);
-    ctx.lineTo(BOAT_W * 0.55, -BOAT_H * 0.05);
+    ctx.moveTo(BOAT_W * 0.22, -BOAT_H * 1.55);
+    ctx.lineTo(BOAT_W * 0.55, -BOAT_H * 0.03);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(BOAT_W * 0.12, -BOAT_H * 1.42);
-    ctx.lineTo(-BOAT_W * 0.4, -BOAT_H * 0.05);
+    ctx.moveTo(BOAT_W * 0.22, -BOAT_H * 1.55);
+    ctx.lineTo(-BOAT_W * 0.4, -BOAT_H * 0.02);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(BOAT_W * 0.22, -BOAT_H * 0.9);
+    ctx.lineTo(-BOAT_W * 0.35, -BOAT_H * 0.02);
     ctx.stroke();
 
-    // Mastlaterne
-    ctx.fillStyle = '#ffcc44';
-    ctx.shadowColor = 'rgba(255,200,80,0.9)';
-    ctx.shadowBlur = 14;
+    // Masttopp-Laterne
+    const lanternPulse = 0.85 + Math.sin(gameTime * 4) * 0.15;
+    ctx.fillStyle = 'rgba(255,220,90,' + lanternPulse + ')';
+    ctx.shadowColor = 'rgba(255,210,80,0.95)';
+    ctx.shadowBlur = 16;
     ctx.beginPath();
-    ctx.arc(BOAT_W * 0.12, -BOAT_H * 1.47, 2.8, 0, Math.PI * 2);
+    ctx.arc(BOAT_W * 0.22, -BOAT_H * 1.6, 3, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
 
     // Flagge
     ctx.beginPath();
-    ctx.moveTo(BOAT_W * 0.12, -BOAT_H * 1.45);
-    ctx.lineTo(BOAT_W * 0.42, -BOAT_H * 1.33);
-    ctx.lineTo(BOAT_W * 0.12, -BOAT_H * 1.22);
+    ctx.moveTo(BOAT_W * 0.22, -BOAT_H * 1.58);
+    ctx.lineTo(BOAT_W * 0.52, -BOAT_H * 1.46);
+    ctx.lineTo(BOAT_W * 0.22, -BOAT_H * 1.34);
     ctx.closePath();
     ctx.fillStyle = '#ff5757';
     ctx.fill();
+    ctx.strokeStyle = 'rgba(255,150,150,0.7)';
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
 
     // Bugspriet
     ctx.beginPath();
-    ctx.moveTo(BOAT_W * 0.55, 0);
-    ctx.lineTo(BOAT_W * 0.75, -BOAT_H * 0.1);
+    ctx.moveTo(BOAT_W * 0.55, -1);
+    ctx.lineTo(BOAT_W * 0.78, -BOAT_H * 0.15);
     ctx.strokeStyle = '#5a3a1a';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.2;
     ctx.stroke();
+
+    // Bugwasser-Schaum am Rumpf
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = 'rgba(220,245,255,0.5)';
+    ctx.beginPath();
+    ctx.ellipse(BOAT_W * 0.52, BOAT_H * 0.05, 4, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
 
     ctx.restore();
   }
 
   // ============================================================
-  //  RENDER — Bubbles (normal + Super)
+  //  RENDER — Bubbles
   // ============================================================
   function drawBubbles() {
     for (let i = 0; i < bubbles.length; i++) {
@@ -1444,7 +1339,6 @@
       const pulse = Math.sin(b.pulse) * 0.3 + 0.7;
 
       if (b.isSuper) {
-        // Äußerer Regenbogen-Glow
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
         const glowR = b.r * 3.2;
@@ -1457,7 +1351,6 @@
         ctx.arc(px, py, glowR, 0, Math.PI * 2);
         ctx.fill();
 
-        // Rotierende Strahlen
         ctx.translate(px, py);
         ctx.rotate(b.rotation);
         for (let k = 0; k < 8; k++) {
@@ -1471,11 +1364,8 @@
         }
         ctx.restore();
 
-        // Regenbogen-Body
         const bg = ctx.createRadialGradient(
-          px - b.r * 0.35, py - b.r * 0.4, b.r * 0.1,
-          px, py, b.r
-        );
+          px - b.r * 0.35, py - b.r * 0.4, b.r * 0.1, px, py, b.r);
         bg.addColorStop(0, '#ffffff');
         bg.addColorStop(0.25, '#ff80ff');
         bg.addColorStop(0.5, '#8080ff');
@@ -1486,20 +1376,17 @@
         ctx.arc(px, py, b.r, 0, Math.PI * 2);
         ctx.fill();
 
-        // Innenring
         ctx.strokeStyle = 'rgba(255,255,255,' + (0.7 * pulse) + ')';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(px, py, b.r * 0.6, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Highlight
         ctx.fillStyle = 'rgba(255,255,255,0.9)';
         ctx.beginPath();
         ctx.arc(px - b.r * 0.32, py - b.r * 0.35, b.r * 0.26, 0, Math.PI * 2);
         ctx.fill();
       } else {
-        // Normaler Bubble
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
         const glowR = b.r * 2.8;
@@ -1514,141 +1401,11 @@
         ctx.restore();
 
         const bg = ctx.createRadialGradient(
-          px - b.r * 0.35, py - b.r * 0.4, b.r * 0.1,
-          px, py, b.r
-        );
+          px - b.r * 0.35, py - b.r * 0.4, b.r * 0.1, px, py, b.r);
         bg.addColorStop(0, 'rgba(255,255,240,1)');
         bg.addColorStop(0.35, 'rgba(255,235,120,0.95)');
         bg.addColorStop(0.75, 'rgba(255,190,40,0.9)');
         bg.addColorStop(1, 'rgba(210,140,0,0.85)');
         ctx.fillStyle = bg;
         ctx.beginPath();
-        ctx.arc(px, py, b.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = 'rgba(255,255,220,' + (0.5 * pulse) + ')';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(px, py, b.r * 0.6, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.beginPath();
-        ctx.arc(px - b.r * 0.32, py - b.r * 0.35, b.r * 0.25, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.beginPath();
-        ctx.arc(px + b.r * 0.3, py + b.r * 0.15, b.r * 0.12, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-
-  // ============================================================
-  //  RENDER — Partikel & Floater
-  // ============================================================
-  function drawParticles() {
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      const alpha = Math.max(0, p.life / p.maxLife);
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function drawFloaters() {
-    ctx.textAlign = 'center';
-    for (let i = 0; i < floaters.length; i++) {
-      const f = floaters[i];
-      const alpha = Math.max(0, f.life / f.maxLife);
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = f.color || '#ffd700';
-      ctx.font = '900 ' + (f.size || 22) + 'px -apple-system, "Segoe UI", sans-serif';
-      ctx.shadowColor = f.color || 'rgba(255,215,0,0.9)';
-      ctx.shadowBlur = 12;
-      ctx.fillText(f.text, f.x, f.y);
-    }
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
-  }
-
-  // ============================================================
-  //  RENDER — Hauptfunktion
-  // ============================================================
-  function render() {
-    ctx.save();
-    if (screenShake > 0) {
-      const sx = (Math.random() - 0.5) * screenShake;
-      const sy = (Math.random() - 0.5) * screenShake;
-      ctx.translate(sx, sy);
-    }
-
-    drawBackground();
-    drawWater();
-
-    for (let i = 0; i < obstacles.length; i++) drawObstacle(obstacles[i]);
-    drawBubbles();
-
-    if (state !== STATE.GAMEOVER) drawBoat();
-
-    drawParticles();
-    drawFloaters();
-
-    ctx.restore();
-
-    if (flashAlpha > 0) {
-      ctx.fillStyle = 'rgba(255,120,120,' + Math.min(1, flashAlpha) + ')';
-      ctx.fillRect(0, 0, W, H);
-    }
-  }
-
-  // ============================================================
-  //  GAME LOOP
-  // ============================================================
-  let lastTime = performance.now();
-
-  function loop(now) {
-    const dt = Math.min((now - lastTime) / 1000, 0.05);
-    lastTime = now;
-
-    if (state === STATE.PLAYING || state === STATE.MENU || state === STATE.GAMEOVER) {
-      update(dt);
-    } else {
-      gameTime += dt * 0.001;
-    }
-    render();
-    requestAnimationFrame(loop);
-  }
-
-  // ============================================================
-  //  EVENT LISTENERS
-  // ============================================================
-  playBtn.addEventListener('click', startGame);
-  retryBtn.addEventListener('click', startGame);
-  menuBtn.addEventListener('click', goToMenu);
-  pauseBtn.addEventListener('click', pauseGame);
-  resumeBtn.addEventListener('click', resumeGame);
-  quitBtn.addEventListener('click', goToMenu);
-
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden && state === STATE.PLAYING) pauseGame();
-  });
-
-  // ============================================================
-  //  INITIAL START
-  // ============================================================
-  applyLanguage(currentLang);
-  resetIdleScene();
-  requestAnimationFrame(loop);
-
-  console.log('%c🌊 TIDAL v1.3 — complete build, languages DE/EN/ES/FR', 'color:#4dc8ff; font-weight:bold; font-size:14px;');
-
-})();
-</script>
-</body>
-</html>
+        ctx.arc(px, py, b.r, 0,
