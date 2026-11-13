@@ -112,9 +112,7 @@
     transform: scale(1.05);
     box-shadow: 0 8px 50px rgba(77, 200, 255, 0.9), inset 0 1px 0 rgba(255,255,255,0.4);
   }
-  button:active {
-    transform: scale(0.97);
-  }
+  button:active { transform: scale(0.97); }
   button.secondary {
     background: rgba(255, 255, 255, 0.08);
     color: #cfe8ff;
@@ -172,12 +170,7 @@
     text-align: center;
     box-shadow: 0 0 40px rgba(77, 200, 255, 0.15), inset 0 0 30px rgba(77, 200, 255, 0.05);
   }
-  .score-label {
-    font-size: 13px;
-    color: #8ab4d8;
-    letter-spacing: 0.4em;
-    margin-bottom: 6px;
-  }
+  .score-label { font-size: 13px; color: #8ab4d8; letter-spacing: 0.4em; margin-bottom: 6px; }
   .score-value {
     font-size: clamp(48px, 14vw, 72px);
     font-weight: 900;
@@ -193,10 +186,7 @@
     letter-spacing: 0.2em;
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
   }
-  .highscore-value {
-    color: #ffd700;
-    font-weight: 800;
-  }
+  .highscore-value { color: #ffd700; font-weight: 800; }
 
   .instructions {
     margin-top: 32px;
@@ -207,10 +197,6 @@
     max-width: 420px;
     padding: 20px;
     border-top: 1px solid rgba(77, 200, 255, 0.15);
-  }
-  .instructions strong {
-    color: #4dc8ff;
-    font-weight: 700;
   }
   .instructions .gesture {
     display: inline-block;
@@ -273,14 +259,12 @@
     <h1 class="title">TIDAL</h1>
     <p class="subtitle">STEUERE DAS WASSER.<br>NICHT DAS BOOT.</p>
     <button id="playBtn">▶ SPIELEN</button>
-    <div class="menu-highscore">
-      HIGHSCORE: <span id="menuHighscore">0</span>
-    </div>
+    <div class="menu-highscore">HIGHSCORE: <span id="menuHighscore">0</span></div>
     <div class="instructions">
       <span class="gesture">GEDRÜCKT HALTEN</span> → Wasser steigt<br>
       <span class="gesture">LOSLASSEN</span> → Wasser sinkt<br><br>
       Manövriere dein Boot durch die Lücken.<br>
-      Sammle goldene Bubbles für Bonuspunkte!
+      <span style="color:#ff80ff">⭐ Regenbogen-Bubbles = +25 Punkte</span>
     </div>
   </div>
 
@@ -304,9 +288,9 @@
 
 <script>
 // =============================================================
-//  TIDAL — Version 1.1
-//  Bugfix: Bubbles in Wänden | Größere Bubbles |
-//  Flüssigere Steuerung | Realistisches Wasser
+//  TIDAL — Version 1.2
+//  Bugfix (Bubbles in Wänden) | Super-Bubble | Realistisches
+//  Boot | Realistisches Wasser mit Animation
 // =============================================================
 
 (function () {
@@ -375,7 +359,6 @@
   let bubbleSpawnTimer = 0;
   let tutorialTimer = 0;
 
-  // ----- Physik-Parameter (v1.1: weicher, smoother) -----
   const WATER_RISE_SPEED = 420;
   const WATER_FALL_SPEED = 320;
   const WATER_RISE_RESPONSIVENESS = 10;
@@ -386,12 +369,14 @@
   const BOAT_FOLLOW_RATE = 18;
   const BOAT_ANGLE_RATE = 11;
   const BUBBLE_RADIUS = 17;
+  const SUPER_BUBBLE_RADIUS = 26;
+  const SUPER_BUBBLE_CHANCE = 0.06;
 
   menuHighscoreEl.textContent = highscore;
 
   function spawnParticle(x, y, vx, vy, opts) {
     opts = opts || {};
-    if (particles.length > 260) return;
+    if (particles.length > 300) return;
     particles.push({
       x: x, y: y, vx: vx, vy: vy,
       life: opts.life || 1,
@@ -460,41 +445,46 @@
   }
 
   // ============================================================
-  //  v1.1 BUGFIX: Bubble-Spawn prüft Hindernisse
+  //  v1.2 BUGFIX: Bubble wird ZENTRIERT in die Lücke gesetzt
+  //  (vorher: an den Rand → Bubble sah aus wie in der Wand)
   // ============================================================
   function spawnBubble(baseX, baseY) {
-    const r = BUBBLE_RADIUS;
-    const margin = r + 5;
+    const isSuper = Math.random() < SUPER_BUBBLE_CHANCE;
+    const r = isSuper ? SUPER_BUBBLE_RADIUS : BUBBLE_RADIUS;
+    const edgeBuffer = r + 20;
     let x = baseX;
     let y = baseY;
 
-    // Prüfe jedes Hindernis: würde die Bubble in einer Säule landen?
     for (let i = 0; i < obstacles.length; i++) {
       const obs = obstacles[i];
-      const overlapsX = (x + margin > obs.x) && (x - margin < obs.x + obs.width);
-      if (!overlapsX) continue;
+      const obsLeft = obs.x - r - 6;
+      const obsRight = obs.x + obs.width + r + 6;
+      if (x < obsLeft || x > obsRight) continue;
 
-      // Bubble liegt X-mäßig im Hindernis → Y in die Lücke zwingen
-      const gapTop = obs.gapY + margin;
-      const gapBottom = obs.gapY + obs.gapHeight - margin;
+      const safeTop = obs.gapY + edgeBuffer;
+      const safeBottom = obs.gapY + obs.gapHeight - edgeBuffer;
 
-      // Kein Platz für die Bubble in der Lücke → diesen Spawn auslassen
-      if (gapTop > gapBottom) return;
+      if (safeTop >= safeBottom) {
+        // Lücke zu klein für diese Bubble → Spawn überspringen
+        return;
+      }
 
-      if (y < gapTop) y = gapTop;
-      if (y > gapBottom) y = gapBottom;
+      // Bubble EXAKT in die Mitte der Lücke setzen (nicht an den Rand)
+      y = (safeTop + safeBottom) / 2;
+      break;
     }
 
-    // Zusätzlich gegen oberen/unteren Bildschirmrand absichern
-    const minY = margin + 4;
-    const maxY = H - margin - 4;
-    if (y < minY) y = minY;
-    if (y > maxY) y = maxY;
+    // Bildschirm-Grenzen
+    const screenMin = r + 10;
+    const screenMax = H - r - 10;
+    if (y < screenMin) y = screenMin;
+    if (y > screenMax) y = screenMax;
 
     bubbles.push({
-      x: x, y: y, r: r,
+      x: x, y: y, r: r, isSuper: isSuper,
       bob: Math.random() * Math.PI * 2,
-      pulse: Math.random() * Math.PI * 2
+      pulse: Math.random() * Math.PI * 2,
+      rotation: Math.random() * Math.PI * 2
     });
   }
 
@@ -529,9 +519,6 @@
     }
   });
 
-  // =========================================================
-  //  GAME FLOW
-  // =========================================================
   function startGame() {
     state = STATE.PLAYING;
     gameTime = 0;
@@ -627,9 +614,6 @@
     floaters = [];
   }
 
-  // =========================================================
-  //  UPDATE  (v1.1: neue Physik)
-  // =========================================================
   function update(dt) {
     if (dt > 0.05) dt = 0.05;
 
@@ -643,7 +627,6 @@
 
       scrollSpeed = 260 + Math.min(distance * 0.55, 280);
 
-      // ---- v1.1: Velocity-Target-Physik (flüssiger) ----
       const targetVel = holding ? -WATER_RISE_SPEED : WATER_FALL_SPEED;
       const responsiveness = holding ? WATER_RISE_RESPONSIVENESS : WATER_FALL_RESPONSIVENESS;
       const lerpF = 1 - Math.exp(-responsiveness * dt);
@@ -653,7 +636,6 @@
       if (waterVel < -WATER_MAX_SPEED) waterVel = -WATER_MAX_SPEED;
       waterY += waterVel * dt;
 
-      // ---- Weicher Rand-Bounce statt hartem Clamp ----
       const minY = H * 0.08;
       const maxY = H * 0.92;
       if (waterY < minY) {
@@ -669,7 +651,6 @@
         spawnSplash(boat.x, waterY, Math.min(1, Math.abs(waterVel) / WATER_MAX_SPEED));
       }
 
-      // ---- v1.1: Boot folgt Wasser per exp. Glättung ----
       const bob = Math.sin(gameTime * 3.2) * 2.5 + Math.sin(gameTime * 5.7) * 1.1;
       const targetY = waterY - BOAT_H * 0.4 + bob;
       boat.y += (targetY - boat.y) * (1 - Math.exp(-BOAT_FOLLOW_RATE * dt));
@@ -690,8 +671,6 @@
 
       bubbleSpawnTimer -= dt;
       if (bubbleSpawnTimer <= 0) {
-        // v1.1: Bubble weiter links spawnen, damit sie nicht mit frisch
-        // gespawnten Hindernissen (bei W+50) kollidiert
         const spawnY = H * 0.12 + Math.random() * H * 0.76;
         spawnBubble(W + 26, spawnY);
         bubbleSpawnTimer = 1.6 + Math.random() * 2.2;
@@ -714,20 +693,35 @@
         b.x -= scrollSpeed * dt;
         b.bob += dt * 2;
         b.pulse += dt * 4;
+        b.rotation += dt * (b.isSuper ? 2.2 : 0);
 
         const dx = b.x - boat.x;
         const dy = (b.y + Math.sin(b.bob) * 5) - boat.y;
         const hitR = BOAT_W * 0.5 + b.r;
         if (dx * dx + dy * dy < hitR * hitR) {
-          score += 5;
+          const pts = b.isSuper ? 25 : 5;
+          score += pts;
           scoreEl.textContent = score;
-          for (let k = 0; k < 14; k++) {
+
+          // Partikel
+          const particleColor = b.isSuper
+            ? (Math.random() < 0.5 ? 'rgba(255,120,220,0.95)' : 'rgba(200,150,255,0.95)')
+            : 'rgba(255,215,0,0.95)';
+          const particleCount = b.isSuper ? 26 : 14;
+          for (let k = 0; k < particleCount; k++) {
             const a = Math.random() * Math.PI * 2;
-            spawnParticle(b.x, b.y, Math.cos(a) * 220, Math.sin(a) * 220, {
-              life: 0.55, size: 3.5, color: 'rgba(255,215,0,0.95)', gravity: 0
+            const sp = b.isSuper ? 280 : 220;
+            spawnParticle(b.x, b.y, Math.cos(a) * sp, Math.sin(a) * sp, {
+              life: 0.6, size: b.isSuper ? 4.5 : 3.5, color: particleColor, gravity: 0
             });
           }
-          floaters.push({ x: b.x, y: b.y, text: '+5', life: 1, maxLife: 1, vy: -80 });
+
+          floaters.push({
+            x: b.x, y: b.y, text: '+' + pts,
+            life: 1, maxLife: 1, vy: -80,
+            color: b.isSuper ? '#ff80ff' : '#ffd700',
+            size: b.isSuper ? 28 : 22
+          });
           bubbles.splice(i, 1);
           continue;
         }
@@ -786,8 +780,7 @@
   const ambientBubbles = [];
   for (let i = 0; i < 32; i++) {
     ambientBubbles.push({
-      x: Math.random(),
-      y: Math.random(),
+      x: Math.random(), y: Math.random(),
       r: 1 + Math.random() * 3.5,
       speed: 0.006 + Math.random() * 0.02,
       drift: Math.random() * Math.PI * 2,
@@ -830,412 +823,18 @@
   }
 
   // ============================================================
-  //  v1.1: REALISTISCHES WASSER mit Animation
+  //  v1.2: REALISTISCHES WASSER (komplett überarbeitet)
+  //  5 Wellen + Strömung | God Rays | Kaustik | Foam | Glitzer
   // ============================================================
   function drawWater() {
     const wy = waterY;
     const t = gameTime;
+    const step = 3;
+    const current = t * 30; // horizontale Strömung
 
-    // ---- Wellen-Pfad mit 4 überlagerten Frequenzen berechnen ----
+    // ---- Wellen-Pfad mit 5 Komponenten + Strömung ----
     const wavePts = [];
-    const step = 4;
     for (let x = 0; x <= W + step; x += step) {
       let y = wy;
-      y += Math.sin(x * 0.011 + t * 2.2) * 6;
-      y += Math.sin(x * 0.022 - t * 3.1) * 3.2;
-      y += Math.sin(x * 0.005 + t * 1.4) * 4.5;
-      y += Math.sin(x * 0.04 + t * 4.5) * 1.6;
-      wavePts.push({ x: x, y: y });
-    }
-
-    function buildPath() {
-      ctx.beginPath();
-      ctx.moveTo(0, H);
-      ctx.lineTo(wavePts[0].x, wavePts[0].y);
-      for (let i = 1; i < wavePts.length; i++) {
-        ctx.lineTo(wavePts[i].x, wavePts[i].y);
-      }
-      ctx.lineTo(wavePts[wavePts.length - 1].x, H);
-      ctx.closePath();
-    }
-
-    // ---- Wasser-Körper mit Tiefen-Gradient ----
-    const grad = ctx.createLinearGradient(0, wy - 30, 0, H);
-    grad.addColorStop(0, 'rgba(80,190,245,0.62)');
-    grad.addColorStop(0.12, 'rgba(45,150,225,0.80)');
-    grad.addColorStop(0.35, 'rgba(20,95,185,0.90)');
-    grad.addColorStop(0.7, 'rgba(8,50,130,0.95)');
-    grad.addColorStop(1, 'rgba(2,15,50,0.98)');
-    buildPath();
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    // ---- Unterwasser-Effekte (geclippt) ----
-    ctx.save();
-    buildPath();
-    ctx.clip();
-    ctx.globalCompositeOperation = 'lighter';
-
-    // Lichtstrahlen von der Oberfläche
-    for (let i = 0; i < 5; i++) {
-      const bx = ((i / 5) * W + Math.sin(t * 0.4 + i * 1.3) * 50 + W) % W;
-      const rayW = 25 + Math.sin(t + i) * 10;
-      ctx.fillStyle = 'rgba(150,220,255,0.06)';
-      ctx.beginPath();
-      ctx.moveTo(bx - rayW * 0.3, wy);
-      ctx.lineTo(bx + rayW * 0.3, wy);
-      ctx.lineTo(bx + rayW, H);
-      ctx.lineTo(bx, H);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    // Kaustik-Blobs (bewegte Lichtflecken)
-    for (let i = 0; i < 6; i++) {
-      const cx = ((i * 173 + t * 40) % (W + 200)) - 100;
-      const baseY = wy + 50 + (i % 3) * 60;
-      const cy = baseY + Math.sin(t * 1.5 + i) * 25;
-      const r = 55 + Math.sin(t * 0.8 + i * 2) * 15;
-      const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-      cg.addColorStop(0, 'rgba(180,230,255,0.10)');
-      cg.addColorStop(0.6, 'rgba(140,210,255,0.04)');
-      cg.addColorStop(1, 'rgba(180,230,255,0)');
-      ctx.fillStyle = cg;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Tiefen-Glow unten
-    const deepGlow = ctx.createRadialGradient(W * 0.5, H, 0, W * 0.5, H, H * 0.8);
-    deepGlow.addColorStop(0, 'rgba(0,60,180,0.28)');
-    deepGlow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = deepGlow;
-    ctx.fillRect(0, wy, W, H - wy);
-
-    ctx.restore();
-
-    // ---- Oberflächen-Highlight (Glow + helle Linie) ----
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-
-    ctx.beginPath();
-    for (let i = 0; i < wavePts.length; i++) {
-      if (i === 0) ctx.moveTo(wavePts[i].x, wavePts[i].y - 3);
-      else ctx.lineTo(wavePts[i].x, wavePts[i].y - 3);
-    }
-    ctx.strokeStyle = 'rgba(150,220,255,0.30)';
-    ctx.lineWidth = 10;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-
-    ctx.beginPath();
-    for (let i = 0; i < wavePts.length; i++) {
-      if (i === 0) ctx.moveTo(wavePts[i].x, wavePts[i].y - 1);
-      else ctx.lineTo(wavePts[i].x, wavePts[i].y - 1);
-    }
-    ctx.strokeStyle = 'rgba(220,245,255,0.85)';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-
-    ctx.restore();
-
-    // ---- Oberflächen-Glitzer ----
-    for (let i = 0; i < 18; i++) {
-      const sx = ((i * 89 + t * 55) % W);
-      const idx = Math.floor(sx / step);
-      if (idx >= 0 && idx < wavePts.length) {
-        const sy = wavePts[idx].y;
-        const twinkle = Math.abs(Math.sin(t * 3.5 + i * 1.7));
-        if (twinkle > 0.55) {
-          const alpha = Math.min(1, (twinkle - 0.55) * 1.8);
-          ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')';
-          ctx.beginPath();
-          ctx.arc(sx, sy - 1, 1.5 + Math.sin(t * 5 + i) * 0.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
-  }
-
-  function drawPillar(x, y, w, h, hue, pulse, isTop) {
-    if (h <= 0) return;
-
-    ctx.fillStyle = 'hsla(' + hue + ',100%,60%,' + (0.10 * pulse) + ')';
-    ctx.fillRect(x - 6, y, w + 12, h);
-
-    const grad = ctx.createLinearGradient(x, 0, x + w, 0);
-    grad.addColorStop(0, 'hsla(' + hue + ',70%,22%,0.95)');
-    grad.addColorStop(0.3, 'hsla(' + hue + ',80%,38%,0.98)');
-    grad.addColorStop(0.5, 'hsla(' + hue + ',90%,50%,1)');
-    grad.addColorStop(0.7, 'hsla(' + hue + ',80%,38%,0.98)');
-    grad.addColorStop(1, 'hsla(' + hue + ',70%,22%,0.95)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(x, y, w, h);
-
-    ctx.fillStyle = 'hsla(' + hue + ',100%,70%,' + (0.4 * pulse) + ')';
-    ctx.fillRect(x + w * 0.5 - 1, y, 2, h);
-
-    const capY = isTop ? y + h - 4 : y;
-    const capGrad = ctx.createLinearGradient(x, capY, x, capY + 4);
-    capGrad.addColorStop(0, 'hsla(' + hue + ',100%,78%,' + (0.9 * pulse) + ')');
-    capGrad.addColorStop(1, 'hsla(' + hue + ',100%,50%,0)');
-    ctx.fillStyle = capGrad;
-    ctx.fillRect(x, capY, w, 4);
-
-    ctx.strokeStyle = 'hsla(' + hue + ',100%,72%,' + (0.5 * pulse) + ')';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-
-    ctx.strokeStyle = 'hsla(' + hue + ',100%,80%,0.12)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i < 4; i++) {
-      const ly = y + (h / 4) * i;
-      ctx.beginPath();
-      ctx.moveTo(x + 5, ly);
-      ctx.lineTo(x + w - 5, ly);
-      ctx.stroke();
-    }
-  }
-
-  function drawObstacle(obs) {
-    const pulse = Math.sin(obs.glowPulse) * 0.35 + 0.65;
-    const bottomY = obs.gapY + obs.gapHeight;
-    drawPillar(obs.x, 0, obs.width, obs.gapY, obs.hue, pulse, true);
-    drawPillar(obs.x, bottomY, obs.width, H - bottomY, obs.hue, pulse, false);
-
-    const gapGrad = ctx.createLinearGradient(obs.x, obs.gapY, obs.x, bottomY);
-    gapGrad.addColorStop(0, 'hsla(' + obs.hue + ',100%,70%,' + (0.06 * pulse) + ')');
-    gapGrad.addColorStop(0.5, 'hsla(' + obs.hue + ',100%,80%,' + (0.14 * pulse) + ')');
-    gapGrad.addColorStop(1, 'hsla(' + obs.hue + ',100%,70%,' + (0.06 * pulse) + ')');
-    ctx.fillStyle = gapGrad;
-    ctx.fillRect(obs.x, obs.gapY, obs.width, obs.gapHeight);
-  }
-
-  function drawBoat() {
-    ctx.save();
-    ctx.translate(boat.x, boat.y);
-    ctx.rotate(boat.angle);
-
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    const glowGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 48);
-    glowGrad.addColorStop(0, 'rgba(168,240,255,0.35)');
-    glowGrad.addColorStop(1, 'rgba(168,240,255,0)');
-    ctx.fillStyle = glowGrad;
-    ctx.beginPath();
-    ctx.arc(0, 0, 48, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    ctx.beginPath();
-    ctx.moveTo(-BOAT_W * 0.55, 0);
-    ctx.quadraticCurveTo(-BOAT_W * 0.55, BOAT_H * 0.55, 0, BOAT_H * 0.55);
-    ctx.quadraticCurveTo(BOAT_W * 0.55, BOAT_H * 0.55, BOAT_W * 0.55, 0);
-    ctx.closePath();
-    const hullGrad = ctx.createLinearGradient(0, 0, 0, BOAT_H * 0.55);
-    hullGrad.addColorStop(0, '#ffe6c2');
-    hullGrad.addColorStop(0.5, '#c97a2b');
-    hullGrad.addColorStop(1, '#6b3a12');
-    ctx.fillStyle = hullGrad;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255,220,180,0.6)';
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(-BOAT_W * 0.55, 0);
-    ctx.lineTo(BOAT_W * 0.55, 0);
-    ctx.strokeStyle = 'rgba(255,245,220,0.9)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(0, -BOAT_H * 0.05);
-    ctx.lineTo(0, -BOAT_H * 1.35);
-    ctx.lineTo(BOAT_W * 0.42, -BOAT_H * 0.05);
-    ctx.closePath();
-    const sailGrad = ctx.createLinearGradient(0, -BOAT_H * 1.35, BOAT_W * 0.42, 0);
-    sailGrad.addColorStop(0, '#ffffff');
-    sailGrad.addColorStop(0.5, '#d8f4ff');
-    sailGrad.addColorStop(1, '#a8d8f0');
-    ctx.fillStyle = sailGrad;
-    ctx.shadowColor = 'rgba(168,240,255,0.7)';
-    ctx.shadowBlur = 12;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    ctx.beginPath();
-    ctx.moveTo(0, -BOAT_H * 0.05);
-    ctx.lineTo(0, -BOAT_H * 1.4);
-    ctx.strokeStyle = '#5a3a1a';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(0, -BOAT_H * 1.4);
-    ctx.lineTo(BOAT_W * 0.28, -BOAT_H * 1.28);
-    ctx.lineTo(0, -BOAT_H * 1.18);
-    ctx.closePath();
-    ctx.fillStyle = '#ff5757';
-    ctx.fill();
-
-    ctx.restore();
-  }
-
-  // ============================================================
-  //  v1.1: Größere, hübschere Bubbles
-  // ============================================================
-  function drawBubbles() {
-    for (let i = 0; i < bubbles.length; i++) {
-      const b = bubbles[i];
-      const px = b.x;
-      const py = b.y + Math.sin(b.bob) * 5;
-      const pulse = Math.sin(b.pulse) * 0.3 + 0.7;
-
-      // Großer äußerer Glow
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      const glowR = b.r * 2.8;
-      const g = ctx.createRadialGradient(px, py, 2, px, py, glowR);
-      g.addColorStop(0, 'rgba(255,215,0,' + (0.55 * pulse) + ')');
-      g.addColorStop(0.5, 'rgba(255,180,0,' + (0.20 * pulse) + ')');
-      g.addColorStop(1, 'rgba(255,215,0,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(px, py, glowR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Bubble-Körper
-      const bg = ctx.createRadialGradient(
-        px - b.r * 0.35, py - b.r * 0.4, b.r * 0.1,
-        px, py, b.r
-      );
-      bg.addColorStop(0, 'rgba(255,255,240,1)');
-      bg.addColorStop(0.35, 'rgba(255,235,120,0.95)');
-      bg.addColorStop(0.75, 'rgba(255,190,40,0.9)');
-      bg.addColorStop(1, 'rgba(210,140,0,0.85)');
-      ctx.fillStyle = bg;
-      ctx.beginPath();
-      ctx.arc(px, py, b.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Innenring
-      ctx.strokeStyle = 'rgba(255,255,220,' + (0.5 * pulse) + ')';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(px, py, b.r * 0.6, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Haupt-Highlight
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      ctx.beginPath();
-      ctx.arc(px - b.r * 0.32, py - b.r * 0.35, b.r * 0.25, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Sekundär-Highlight
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.beginPath();
-      ctx.arc(px + b.r * 0.3, py + b.r * 0.15, b.r * 0.12, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  function drawParticles() {
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      const alpha = Math.max(0, p.life / p.maxLife);
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function drawFloaters() {
-    ctx.textAlign = 'center';
-    ctx.font = '900 22px -apple-system, "Segoe UI", sans-serif';
-    for (let i = 0; i < floaters.length; i++) {
-      const f = floaters[i];
-      const alpha = Math.max(0, f.life / f.maxLife);
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = '#ffd700';
-      ctx.shadowColor = 'rgba(255,215,0,0.9)';
-      ctx.shadowBlur = 12;
-      ctx.fillText(f.text, f.x, f.y);
-    }
-    ctx.shadowBlur = 0;
-    ctx.globalAlpha = 1;
-  }
-
-  function render() {
-    ctx.save();
-    if (screenShake > 0) {
-      const sx = (Math.random() - 0.5) * screenShake;
-      const sy = (Math.random() - 0.5) * screenShake;
-      ctx.translate(sx, sy);
-    }
-
-    drawBackground();
-    drawWater();
-
-    for (let i = 0; i < obstacles.length; i++) drawObstacle(obstacles[i]);
-    drawBubbles();
-
-    if (state !== STATE.GAMEOVER) drawBoat();
-
-    drawParticles();
-    drawFloaters();
-
-    ctx.restore();
-
-    if (flashAlpha > 0) {
-      ctx.fillStyle = 'rgba(255,120,120,' + Math.min(1, flashAlpha) + ')';
-      ctx.fillRect(0, 0, W, H);
-    }
-  }
-
-  // =========================================================
-  //  GAME LOOP
-  // =========================================================
-  let lastTime = performance.now();
-
-  function loop(now) {
-    const dt = Math.min((now - lastTime) / 1000, 0.05);
-    lastTime = now;
-
-    if (state === STATE.PLAYING || state === STATE.MENU || state === STATE.GAMEOVER) {
-      update(dt);
-    } else {
-      gameTime += dt * 0.001;
-    }
-    render();
-    requestAnimationFrame(loop);
-  }
-
-  // =========================================================
-  //  EVENT LISTENERS
-  // =========================================================
-  playBtn.addEventListener('click', startGame);
-  retryBtn.addEventListener('click', startGame);
-  menuBtn.addEventListener('click', goToMenu);
-  pauseBtn.addEventListener('click', pauseGame);
-  resumeBtn.addEventListener('click', resumeGame);
-  quitBtn.addEventListener('click', goToMenu);
-
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden && state === STATE.PLAYING) pauseGame();
-  });
-
-  resetIdleScene();
-  requestAnimationFrame(loop);
-
-  console.log('%c🌊 TIDAL v1.1 — smoother controls, realistic water, fixed bubbles', 'color:#4dc8ff; font-weight:bold; font-size:14px;');
-
-})();
-</script>
-</body>
-</html>
+      y += Math.sin((x + current) * 0.004 - t * 1.1) * 9;
+      y +=
