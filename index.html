@@ -984,3 +984,53 @@ console.log('%c⚙ Admin-Code: TIDAL2024 (Zahnrad unten links im Menü)', 'color
 </script>
 </body>
 </html>
+// === HOTFIX v2.2.1 — Canvas-Resize + Loop-Restart + Debug ===
+function resize(){
+  var rect = container.getBoundingClientRect();
+  var ww = window.innerWidth || 800;
+  var wh = window.innerHeight || 600;
+  W = (rect.width > 10) ? rect.width : ww;
+  H = (rect.height > 10) ? rect.height : wh;
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.floor(W*DPR);
+  canvas.height = Math.floor(H*DPR);
+  canvas.style.width = W+'px';
+  canvas.style.height = H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', function(){ setTimeout(resize, 100); });
+resize();
+
+var _hb = 0;
+function loop(now){
+  _hb = performance.now();
+  try {
+    var dt = Math.min((now - lastTime)/1000, 0.05);
+    lastTime = now;
+    if(state===STATE.PLAYING || state===STATE.MENU || state===STATE.GAMEOVER){ update(dt); }
+    else { gameTime += dt*0.001; }
+    render();
+  } catch(e) {
+    console.error('GAME ERROR:', e);
+    try { ctx.restore(); } catch(x){}
+  }
+  requestAnimationFrame(loop);
+}
+setTimeout(function(){
+  if(performance.now() - _hb > 200){
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
+  }
+}, 250);
+
+// Debug-Anzeige oben links
+var _dbg = document.createElement('div');
+_dbg.id = 'tidalDebug';
+_dbg.style.cssText = 'position:fixed;top:70px;left:8px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:11px;padding:6px 8px;z-index:99999;border-radius:4px;pointer-events:none;white-space:pre-line;line-height:1.4';
+document.body.appendChild(_dbg);
+setInterval(function(){
+  try {
+    _dbg.textContent = 'W:' + Math.round(W) + ' H:' + Math.round(H) + '\nstate:' + state + '\nobs:' + obstacles.length + ' parts:' + particles.length;
+  } catch(e){}
+}, 300);
