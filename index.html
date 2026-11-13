@@ -23,7 +23,7 @@ h2{font-size:clamp(32px,9vw,60px);font-weight:900;letter-spacing:.1em;color:#ff6
 button{font-family:inherit;font-size:clamp(16px,4vw,20px);font-weight:700;letter-spacing:.2em;padding:16px 48px;border:none;border-radius:14px;background:linear-gradient(135deg,#4dc8ff,#1a8cd8);color:#001a2e;cursor:pointer;box-shadow:0 6px 30px rgba(77,200,255,.5),inset 0 1px 0 rgba(255,255,255,.4);transition:transform .15s,box-shadow .15s;margin:8px;min-width:180px}
 button:active{transform:scale(.97)}
 button.secondary{background:rgba(255,255,255,.08);color:#cfe8ff;box-shadow:0 4px 20px rgba(255,255,255,.08),inset 0 1px 0 rgba(255,255,255,.1);border:1px solid rgba(168,240,255,.25)}
-#shopBtn{background:rgba(255,215,0,.15);border:1.5px solid rgba(255,215,0,.5);color:#ffd700;font-size:16px;padding:12px 32px;min-width:180px;margin-top:0;box-shadow:0 0 20px rgba(255,215,0,.3)}
+#shopBtn{background:rgba(255,215,0,.15);border:1.5px solid rgba(255,215,0,.5);color:#ffd700;font-size:16px;padding:12px 32px;min-width:180px;box-shadow:0 0 20px rgba(255,215,0,.3)}
 .menu-coins{margin-top:16px;font-size:20px;color:#ffd700;font-weight:900;text-shadow:0 0 15px rgba(255,215,0,.6)}
 .menu-highscore{margin-top:16px;font-size:14px;color:#ffd700;letter-spacing:.15em;text-shadow:0 0 15px rgba(255,215,0,.4)}
 #hud{position:absolute;inset:0;pointer-events:none;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;padding:20px;padding-top:max(20px,env(safe-area-inset-top));padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
@@ -65,835 +65,83 @@ button.secondary{background:rgba(255,255,255,.08);color:#cfe8ff;box-shadow:0 4px
 .shop-btn.owned{background:rgba(100,200,255,.2);color:#d0faff;border:1px solid rgba(168,240,255,.4)}
 .shop-btn.selected{background:rgba(80,200,100,.3);color:#a0ffa0;border:1px solid rgba(100,255,100,.5)}
 .shop-btn:disabled{opacity:.35;cursor:not-allowed}
-</style>
-</head>
-<body>
-<div id="game-container">
-  <canvas id="game"></canvas>
-
-  <div id="hud" class="hidden">
-    <div id="score">0</div>
-    <button id="pauseBtn" aria-label="Pause">⏸</button>
-  </div>
-
-  <div id="tutorialHint"></div>
-
-  <div id="menu" class="overlay">
-    <div id="langBar">
-      <button class="langBtn active" data-lang="de">DE</button>
-      <button class="langBtn" data-lang="en">EN</button>
-      <button class="langBtn" data-lang="es">ES</button>
-      <button class="langBtn" data-lang="fr">FR</button>
-    </div>
-    <h1 class="title">TIDAL</h1>
-    <p class="subtitle" id="menuSubtitle">STEUERE DAS WASSER.<br>NICHT DAS BOOT.</p>
-    <button id="playBtn">▶ SPIELEN</button>
-    <button id="shopBtn">🛒 SHOP</button>
-    <div class="menu-coins">💰 <span id="menuCoins">0</span></div>
-    <div class="menu-highscore"><span id="menuHsLabel">HIGHSCORE</span>: <span id="menuHighscore">0</span></div>
-    <div class="instructions">
-      <span class="gesture" id="holdBadge">GEDRÜCKT HALTEN</span> → <span id="riseText">Wasser steigt</span><br>
-      <span class="gesture" id="releaseBadge">LOSLASSEN</span> → <span id="fallText">Wasser sinkt</span><br><br>
-      <span id="goalText">Manövriere dein Boot durch die Lücken.</span>
-      <div class="super-line" id="superText">⭐ Regenbogen-Bubbles = +25 Punkte</div>
-    </div>
-  </div>
-
-  <div id="shop" class="overlay hidden">
-    <h2 id="shopTitle" style="color:#ffd700;text-shadow:0 0 30px rgba(255,215,0,.8)">SHOP</h2>
-    <div class="shop-coins">💰 <span id="shopCoins">0</span></div>
-    <div class="shop-tabs">
-      <button class="shopTab active" data-tab="boats" id="shopBoatsTab">BOOTE</button>
-      <button class="shopTab" data-tab="walls" id="shopWallsTab">WÄNDE</button>
-    </div>
-    <div id="shopContent" class="shop-content"></div>
-    <button id="closeShopBtn" class="secondary">ZURÜCK</button>
-  </div>
-
-  <div id="gameover" class="overlay hidden">
-    <h2 id="goTitle">GAME OVER</h2>
-    <div class="score-display">
-      <div class="score-label" id="goPointsLabel">PUNKTE</div>
-      <div class="score-value" id="finalScore">0</div>
-      <div class="highscore-label"><span id="goHsLabel">HIGHSCORE</span>: <span class="highscore-value" id="finalHighscore">0</span></div>
-      <div class="coins-earned">💰 +<span id="goCoinsEarned">0</span></div>
-    </div>
-    <button id="retryBtn">NOCHMAL</button>
-    <button id="menuBtn" class="secondary">MENÜ</button>
-  </div>
-
-  <div id="pause" class="overlay hidden">
-    <h2 id="pauseTitle" style="color:#d0faff;text-shadow:0 0 30px rgba(77,200,255,.7)">PAUSE</h2>
-    <button id="resumeBtn">WEITER</button>
-    <button id="quitBtn" class="secondary">MENÜ</button>
-  </div>
-</div>
-
-<script>
-(function(){
-'use strict';
-
-var $ = function(id){ return document.getElementById(id); };
-var canvas = $('game');
-var ctx = canvas.getContext('2d');
-var container = $('game-container');
-var STATE = { MENU: 'menu', PLAYING: 'playing', PAUSED: 'paused', GAMEOVER: 'gameover' };
-var state = STATE.MENU;
-var W = 0, H = 0, DPR = 1;
-var waterY = 0, waterVel = 0, holding = false, gameTime = 0;
-var scrollSpeed = 260, score = 0, distance = 0;
-var highscore = parseInt(localStorage.getItem('tidal_highscore') || '0', 10);
-var screenShake = 0, flashAlpha = 0;
-var boat = { x: 0, y: 0, angle: 0 };
-var obstacles = [], bubbles = [], particles = [], floaters = [];
-var obstacleSpawnTimer = 0, bubbleSpawnTimer = 0, tutorialTimer = 0;
-var lastTime = performance.now();
-var WATER_RISE_SPEED = 420, WATER_FALL_SPEED = 320;
-var WATER_RISE_RESPONSIVENESS = 10, WATER_FALL_RESPONSIVENESS = 6;
-var WATER_MAX_SPEED = 520;
-var BOAT_W = 56, BOAT_H = 38;
-var BUBBLE_RADIUS = 17, SUPER_BUBBLE_RADIUS = 26;
-var SUPER_BUBBLE_CHANCE = 0.06, BUBBLE_WALL_MARGIN = 40;
-
-// ============ SHOP STATE ============
-var coins = parseInt(localStorage.getItem('tidal_coins') || '0', 10);
-var ownedSkins = { boats: ['classic'], walls: ['crystal'] };
-try {
-  var savedOwned = JSON.parse(localStorage.getItem('tidal_owned') || 'null');
-  if (savedOwned && savedOwned.boats && savedOwned.walls) {
-    ownedSkins = savedOwned;
-    if (ownedSkins.boats.indexOf('classic') < 0) ownedSkins.boats.push('classic');
-    if (ownedSkins.walls.indexOf('crystal') < 0) ownedSkins.walls.push('crystal');
-  }
-} catch(e) {}
-var selectedBoat = localStorage.getItem('tidal_boat') || 'classic';
-var selectedWall = localStorage.getItem('tidal_wall') || 'crystal';
-var currentShopTab = 'boats';
-if (ownedSkins.boats.indexOf(selectedBoat) < 0) selectedBoat = 'classic';
-if (ownedSkins.walls.indexOf(selectedWall) < 0) selectedWall = 'crystal';
-
-function saveProgress(){
-  try {
-    localStorage.setItem('tidal_coins', String(coins));
-    localStorage.setItem('tidal_owned', JSON.stringify(ownedSkins));
-    localStorage.setItem('tidal_boat', selectedBoat);
-    localStorage.setItem('tidal_wall', selectedWall);
-  } catch(e) {}
-}
-function updateMenuCoins(){ $('menuCoins').textContent = coins; }
-
-var shopItems = {
-  boats: [
-    {id:'classic', name:'Holzschiff', desc:'Klassisch', price:0, emoji:'🛶'},
-    {id:'pirate', name:'Piratenschiff', desc:'Dunkel & gefährlich', price:100, emoji:'🏴‍☠️'},
-    {id:'crystal', name:'Kristallboot', desc:'Leuchtet blau', price:250, emoji:'💎'},
-    {id:'golden', name:'Goldboot', desc:'Reiner Luxus', price:500, emoji:'👑'}
-  ],
-  walls: [
-    {id:'crystal', name:'Kristall-Türkis', desc:'Standard', price:0, emoji:'💠'},
-    {id:'neon', name:'Neon Pink', desc:'Knallig pink', price:75, emoji:'💜'},
-    {id:'lava', name:'Lava', desc:'Glühend heiß', price:150, emoji:'🔥'},
-    {id:'ice', name:'Eisblau', desc:'Kalt & klar', price:300, emoji:'❄️'}
-  ]
-};
-
-function applyWallSkin(obs){
-  if (selectedWall === 'neon') obs.hue = 300 + Math.random() * 30;
-  else if (selectedWall === 'lava') obs.hue = 5 + Math.random() * 25;
-  else if (selectedWall === 'ice') obs.hue = 200 + Math.random() * 20;
-}
-
-// ============ BUTTONS (sofort registrieren!) ============
-$('playBtn').addEventListener('click', function(){ if(typeof startGame==='function') startGame(); });
-$('retryBtn').addEventListener('click', function(){ if(typeof startGame==='function') startGame(); });
-$('menuBtn').addEventListener('click', function(){ if(typeof goToMenu==='function') goToMenu(); });
-$('pauseBtn').addEventListener('click', function(){ if(typeof pauseGame==='function') pauseGame(); });
-$('resumeBtn').addEventListener('click', function(){ if(typeof resumeGame==='function') resumeGame(); });
-$('quitBtn').addEventListener('click', function(){ if(typeof goToMenu==='function') goToMenu(); });
-$('shopBtn').addEventListener('click', function(){ if(typeof openShop==='function') openShop(); });
-$('closeShopBtn').addEventListener('click', function(){ if(typeof closeShop==='function') closeShop(); });
-
-var shopTabBtns = document.querySelectorAll('.shopTab');
-for(var st=0; st<shopTabBtns.length; st++){
-  shopTabBtns[st].addEventListener('click', function(){ if(typeof switchShopTab==='function') switchShopTab(this.dataset.tab); });
-}
-
-// ============ SPRACHEN ============
-var translations = {
-  de:{subtitle:"STEUERE DAS WASSER.<br>NICHT DAS BOOT.",play:"▶ SPIELEN",shop:"🛒 SHOP",highscore:"HIGHSCORE",hold:"GEDRÜCKT HALTEN",release:"LOSLASSEN",rise:"Wasser steigt",fall:"Wasser sinkt",goal:"Manövriere dein Boot durch die Lücken.",super:"⭐ Regenbogen-Bubbles = +25 Punkte",gameover:"GAME OVER",points:"PUNKTE",retry:"NOCHMAL",menu:"MENÜ",pause:"PAUSE",continueBtn:"WEITER",hint:"GEDRÜCKT HALTEN",shopTitle:"SHOP",shopBoats:"BOOTE",shopWalls:"WÄNDE",shopBack:"ZURÜCK",shopSelect:"AUSWÄHLEN",shopSelected:"✓ AUSGEWÄHLT"},
-  en:{subtitle:"CONTROL THE WATER.<br>NOT THE BOAT.",play:"▶ PLAY",shop:"🛒 SHOP",highscore:"HIGHSCORE",hold:"HOLD PRESSED",release:"RELEASE",rise:"water rises",fall:"water falls",goal:"Navigate your boat through the gaps.",super:"⭐ Rainbow bubbles = +25 points",gameover:"GAME OVER",points:"POINTS",retry:"RETRY",menu:"MENU",pause:"PAUSE",continueBtn:"CONTINUE",hint:"HOLD PRESSED",shopTitle:"SHOP",shopBoats:"BOATS",shopWalls:"WALLS",shopBack:"BACK",shopSelect:"SELECT",shopSelected:"✓ SELECTED"},
-  es:{subtitle:"CONTROLA EL AGUA.<br>NO EL BARCO.",play:"▶ JUGAR",shop:"🛒 TIENDA",highscore:"RÉCORD",hold:"MANTÉN PULSADO",release:"SUELTA",rise:"el agua sube",fall:"el agua baja",goal:"Navega tu barco por los huecos.",super:"⭐ Burbujas arcoíris = +25 puntos",gameover:"FIN DEL JUEGO",points:"PUNTOS",retry:"OTRA VEZ",menu:"MENÚ",pause:"PAUSA",continueBtn:"CONTINUAR",hint:"MANTÉN PULSADO",shopTitle:"TIENDA",shopBoats:"BARCOS",shopWalls:"MUROS",shopBack:"VOLVER",shopSelect:"ELEGIR",shopSelected:"✓ ELEGIDO"},
-  fr:{subtitle:"CONTRÔLE L'EAU.<br>PAS LE BATEAU.",play:"▶ JOUER",shop:"🛒 BOUTIQUE",highscore:"RECORD",hold:"MAINTENIR",release:"RELÂCHER",rise:"l'eau monte",fall:"l'eau descend",goal:"Navigue ton bateau entre les brèches.",super:"⭐ Bulles arc-en-ciel = +25 points",gameover:"PARTIE TERMINÉE",points:"POINTS",retry:"REJOUER",menu:"MENU",pause:"PAUSE",continueBtn:"CONTINUER",hint:"MAINTENIR",shopTitle:"BOUTIQUE",shopBoats:"BATEAUX",shopWalls:"MURS",shopBack:"RETOUR",shopSelect:"CHOISIR",shopSelected:"✓ CHOISI"}
-};
-var currentLang = localStorage.getItem('tidal_lang') || 'de';
-if(!translations[currentLang]) currentLang = 'de';
-
-function applyLanguage(lang){
-  if(!translations[lang]) return;
-  currentLang = lang;
-  try{ localStorage.setItem('tidal_lang', lang); }catch(e){}
-  var t = translations[lang];
-  $('menuSubtitle').innerHTML = t.subtitle;
-  $('playBtn').textContent = t.play;
-  $('shopBtn').textContent = t.shop;
-  $('menuHsLabel').textContent = t.highscore;
-  $('holdBadge').textContent = t.hold;
-  $('releaseBadge').textContent = t.release;
-  $('riseText').textContent = t.rise;
-  $('fallText').textContent = t.fall;
-  $('goalText').textContent = t.goal;
-  $('superText').textContent = t.super;
-  $('goTitle').textContent = t.gameover;
-  $('goPointsLabel').textContent = t.points;
-  $('goHsLabel').textContent = t.highscore;
-  $('retryBtn').textContent = t.retry;
-  $('menuBtn').textContent = t.menu;
-  $('pauseTitle').textContent = t.pause;
-  $('resumeBtn').textContent = t.continueBtn;
-  $('quitBtn').textContent = t.menu;
-  $('shopTitle').textContent = t.shopTitle;
-  $('shopBoatsTab').textContent = t.shopBoats;
-  $('shopWallsTab').textContent = t.shopWalls;
-  $('closeShopBtn').textContent = t.shopBack;
-  var lb = document.querySelectorAll('.langBtn');
-  for(var i=0;i<lb.length;i++){
-    if(lb[i].dataset.lang === lang) lb[i].classList.add('active');
-    else lb[i].classList.remove('active');
-  }
-  document.documentElement.lang = lang;
-  if (currentShopTab) renderShop();
-}
-var langBtns = document.querySelectorAll('.langBtn');
-for(var i=0;i<langBtns.length;i++){
-  langBtns[i].addEventListener('click', function(e){ e.stopPropagation(); applyLanguage(this.dataset.lang); });
-}
-
-// ============ SHOP LOGIK ============
-function openShop(){
-  $('menu').classList.add('hidden');
-  $('shop').classList.remove('hidden');
-  currentShopTab = 'boats';
-  var tabs = document.querySelectorAll('.shopTab');
-  for(var i=0;i<tabs.length;i++){
-    if(tabs[i].dataset.tab === 'boats') tabs[i].classList.add('active');
-    else tabs[i].classList.remove('active');
-  }
-  renderShop();
-}
-function closeShop(){
-  $('shop').classList.add('hidden');
-  $('menu').classList.remove('hidden');
-  updateMenuCoins();
-}
-function switchShopTab(tab){
-  currentShopTab = tab;
-  var tabs = document.querySelectorAll('.shopTab');
-  for(var i=0;i<tabs.length;i++){
-    if(tabs[i].dataset.tab === tab) tabs[i].classList.add('active');
-    else tabs[i].classList.remove('active');
-  }
-  renderShop();
-}
-function renderShop(){
-  $('shopCoins').textContent = coins;
-  var t = translations[currentLang];
-  var items = shopItems[currentShopTab];
-  var html = '';
-  for(var i=0;i<items.length;i++){
-    var item = items[i];
-    var owned = ownedSkins[currentShopTab].indexOf(item.id) >= 0;
-    var sel = (currentShopTab === 'boats' ? selectedBoat : selectedWall) === item.id;
-    var label, cls, action, dis = '';
-    if(sel){ label = t.shopSelected; cls = 'shop-btn selected'; action = 'none'; }
-    else if(owned){ label = t.shopSelect; cls = 'shop-btn owned'; action = 'select'; }
-    else { label = item.price + ' 💰'; cls = 'shop-btn buy'; action = 'buy'; if(coins < item.price) dis = ' disabled'; }
-    html += '<div class="shop-item'+(sel?' active':'')+'">' +
-      '<div class="shop-preview '+currentShopTab+'-'+item.id+'">'+item.emoji+'</div>' +
-      '<div class="shop-item-name">'+item.name+'</div>' +
-      '<div class="shop-item-desc">'+item.desc+'</div>' +
-      '<button class="'+cls+'" data-action="'+action+'" data-tab="'+currentShopTab+'" data-id="'+item.id+'"'+dis+'>'+label+'</button>' +
-      '</div>';
-  }
-  $('shopContent').innerHTML = html;
-  var btns = $('shopContent').querySelectorAll('button');
-  for(var j=0;j<btns.length;j++) btns[j].addEventListener('click', handleShopAction);
-}
-function handleShopAction(){
-  var action = this.dataset.action;
-  var tab = this.dataset.tab;
-  var id = this.dataset.id;
-  if(action === 'none') return;
-  if(action === 'select'){
-    if(tab === 'boats') selectedBoat = id;
-    else selectedWall = id;
-    saveProgress();
-    renderShop();
-  } else if(action === 'buy'){
-    var item = null;
-    for(var i=0;i<shopItems[tab].length;i++){
-      if(shopItems[tab][i].id === id){ item = shopItems[tab][i]; break; }
-    }
-    if(!item || coins < item.price) return;
-    coins -= item.price;
-    ownedSkins[tab].push(id);
-    if(tab === 'boats') selectedBoat = id;
-    else selectedWall = id;
-    saveProgress();
-    updateMenuCoins();
-    renderShop();
-  }
-}
-
-// ============ RESIZE ============
-function resize(){
-  var rect = container.getBoundingClientRect();
-  DPR = Math.min(window.devicePixelRatio || 1, 2);
-  W = rect.width; H = rect.height;
-  canvas.width = Math.floor(W*DPR); canvas.height = Math.floor(H*DPR);
-  canvas.style.width = W+'px'; canvas.style.height = H+'px';
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-}
-window.addEventListener('resize', resize);
-window.addEventListener('orientationchange', function(){ setTimeout(resize, 100); });
-resize();
-
-// ============ PARTIKEL ============
-function spawnParticle(x,y,vx,vy,o){
-  o = o || {};
-  if(particles.length > 340) return;
-  particles.push({x:x,y:y,vx:vx,vy:vy,life:o.life||1,maxLife:o.life||1,size:o.size||3,color:o.color||'rgba(168,240,255,0.8)',gravity:o.gravity||0});
-}
-function spawnDirectionalSplash(x, y, intensity, rising){
-  var count = Math.max(1, Math.floor(intensity*9));
-  for(var i=0;i<count;i++){
-    if(rising){
-      var a1 = -Math.PI/2 + (Math.random()-0.5)*Math.PI*0.9;
-      var s1 = 90 + Math.random()*220*intensity;
-      spawnParticle(x+(Math.random()-0.5)*BOAT_W*0.9, y+2+Math.random()*4, Math.cos(a1)*s1, Math.sin(a1)*s1,
-        {life:0.5+Math.random()*0.35,size:1.5+Math.random()*2.2,color:'rgba(210,245,255,'+(0.7+Math.random()*0.3)+')',gravity:420});
-    } else {
-      var side = Math.random()<0.5?-1:1;
-      var a2 = (side>0?0:Math.PI) + (Math.random()-0.5)*Math.PI*0.55;
-      var s2 = 70 + Math.random()*170*intensity;
-      spawnParticle(x+side*BOAT_W*0.42, y+3+Math.random()*5, Math.cos(a2)*s2, Math.sin(a2)*s2-30,
-        {life:0.45+Math.random()*0.35,size:1.4+Math.random()*2.5,color:'rgba(190,235,255,'+(0.6+Math.random()*0.35)+')',gravity:340});
-    }
-  }
-}
-function spawnExplosion(x,y){
-  for(var i=0;i<36;i++){
-    var a = Math.random()*Math.PI*2, s = 100+Math.random()*380;
-    spawnParticle(x,y,Math.cos(a)*s,Math.sin(a)*s,
-      {life:0.7+Math.random()*0.7,size:3+Math.random()*4,color:'rgba(255,'+((120+Math.random()*100)|0)+','+((100+Math.random()*100)|0)+',1)',gravity:220});
-  }
-}
-
-// ============ HINDERNISSE ============
-function Obstacle(x, gapY, gapHeight){
-  this.x = x; this.gapY = gapY; this.gapHeight = gapHeight;
-  this.width = Math.max(64, W*0.11);
-  this.passed = false;
-  this.hue = 175 + Math.random()*45;
-  this.glowPulse = Math.random()*Math.PI*2;
-}
-function spawnObstacle(){
-  var gapHeightFactor = Math.max(0.22, 0.38 - distance*0.0015);
-  var gapHeight = H*gapHeightFactor;
-  var minY = H*0.12, maxY = H*0.85 - gapHeight;
-  var gapY = minY + Math.random()*Math.max(0, maxY-minY);
-  var obs = new Obstacle(W+50, gapY, gapHeight);
-  applyWallSkin(obs);
-  obstacles.push(obs);
-}
-
-// ============ BUBBLE SPAWN ============
-function spawnBubble(baseX){
-  var targetObs = null, closestDist = Infinity;
-  for(var i=0;i<obstacles.length;i++){
-    var obs = obstacles[i];
-    if(obs.x + obs.width < baseX - 60) continue;
-    if(obs.x > baseX + 200) continue;
-    var dist = Math.abs(obs.x - baseX);
-    if(dist < closestDist){ closestDist = dist; targetObs = obs; }
-  }
-  if(!targetObs) return false;
-  var isSuper = Math.random() < SUPER_BUBBLE_CHANCE;
-  var r = isSuper ? SUPER_BUBBLE_RADIUS : BUBBLE_RADIUS;
-  var safeTop = targetObs.gapY + r + BUBBLE_WALL_MARGIN;
-  var safeBottom = targetObs.gapY + targetObs.gapHeight - r - BUBBLE_WALL_MARGIN;
-  if(safeTop >= safeBottom) return false;
-  var y = (safeTop + safeBottom) / 2;
-  bubbles.push({x:baseX, y:y, r:r, isSuper:isSuper, bob:Math.random()*Math.PI*2, pulse:Math.random()*Math.PI*2, rotation:Math.random()*Math.PI*2});
-  return true;
-}
-
-// ============================================================
-//  ⚠️ TEIL 1 ENDE – HIER GEHT ES IN TEIL 2 WEITER!
-//  ⚠️ Datei JETZT NICHT speichern/öffnen – warte auf Teil 2!
-//  ⚠️ Schreib einfach "weiter" und ich schicke den Rest.
-// ============================================================
- <!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0a1128">
-<title>TIDAL</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#fff;user-select:none;-webkit-user-select:none;touch-action:none;overscroll-behavior:none}
-#game-container{position:fixed;inset:0;overflow:hidden}
-canvas{display:block;width:100%;height:100%}
-.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at center,rgba(10,30,60,.85),rgba(5,10,25,.95));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:10;padding:24px;transition:opacity .4s ease;overflow-y:auto}
-.overlay.hidden{opacity:0;pointer-events:none}
-#langBar{position:absolute;top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));display:flex;gap:8px;z-index:20}
-.langBtn{width:42px;height:42px;border-radius:50%;padding:0;min-width:unset;font-size:12px;font-weight:800;background:rgba(255,255,255,.08);color:#8ab4d8;border:1.5px solid rgba(168,240,255,.25);box-shadow:none;margin:0;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;font-family:inherit}
-.langBtn.active{background:linear-gradient(135deg,#4dc8ff,#1a8cd8);color:#001a2e;border-color:#4dc8ff;box-shadow:0 0 20px rgba(77,200,255,.7)}
-h1.title{font-size:clamp(56px,16vw,130px);font-weight:900;letter-spacing:.15em;background:linear-gradient(180deg,#d0faff,#4dc8ff 40%,#1a6fd8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 30px rgba(77,200,255,.7));margin-bottom:6px;animation:titlePulse 3s ease-in-out infinite}
-@keyframes titlePulse{0%,100%{filter:drop-shadow(0 0 30px rgba(77,200,255,.7))}50%{filter:drop-shadow(0 0 60px rgba(77,200,255,1))}}
-h2{font-size:clamp(32px,9vw,60px);font-weight:900;letter-spacing:.1em;color:#ff6b6b;text-shadow:0 0 30px rgba(255,107,107,.8);margin-bottom:24px;text-align:center}
-.subtitle{font-size:clamp(13px,3.6vw,17px);color:#8ab4d8;margin-bottom:28px;letter-spacing:.15em;text-align:center;line-height:1.6}
-button{font-family:inherit;font-size:clamp(16px,4vw,20px);font-weight:700;letter-spacing:.2em;padding:16px 48px;border:none;border-radius:14px;background:linear-gradient(135deg,#4dc8ff,#1a8cd8);color:#001a2e;cursor:pointer;box-shadow:0 6px 30px rgba(77,200,255,.5),inset 0 1px 0 rgba(255,255,255,.4);transition:transform .15s,box-shadow .15s;margin:8px;min-width:180px}
-button:active{transform:scale(.97)}
-button.secondary{background:rgba(255,255,255,.08);color:#cfe8ff;box-shadow:0 4px 20px rgba(255,255,255,.08),inset 0 1px 0 rgba(255,255,255,.1);border:1px solid rgba(168,240,255,.25)}
-#shopBtn{background:rgba(255,215,0,.15);border:1.5px solid rgba(255,215,0,.5);color:#ffd700;font-size:16px;padding:12px 32px;min-width:180px;margin-top:0;box-shadow:0 0 20px rgba(255,215,0,.3)}
-.menu-coins{margin-top:16px;font-size:20px;color:#ffd700;font-weight:900;text-shadow:0 0 15px rgba(255,215,0,.6)}
-.menu-highscore{margin-top:16px;font-size:14px;color:#ffd700;letter-spacing:.15em;text-shadow:0 0 15px rgba(255,215,0,.4)}
-#hud{position:absolute;inset:0;pointer-events:none;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;padding:20px;padding-top:max(20px,env(safe-area-inset-top));padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
-#hud.hidden{display:none}
-#score{font-size:clamp(32px,8vw,46px);font-weight:900;color:#d0faff;text-shadow:0 0 24px rgba(77,200,255,.9),0 0 8px rgba(77,200,255,.6);letter-spacing:.05em;font-variant-numeric:tabular-nums}
-#pauseBtn{pointer-events:auto;width:52px;height:52px;border-radius:50%;padding:0;font-size:22px;display:flex;align-items:center;justify-content:center;min-width:unset;background:rgba(255,255,255,.12);border:1px solid rgba(168,240,255,.3);color:#fff;box-shadow:0 0 15px rgba(77,200,255,.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.score-display{background:linear-gradient(180deg,rgba(77,200,255,.1),rgba(26,140,216,.05));border:1px solid rgba(77,200,255,.35);border-radius:20px;padding:28px 48px;margin-bottom:24px;text-align:center;box-shadow:0 0 40px rgba(77,200,255,.15),inset 0 0 30px rgba(77,200,255,.05)}
-.score-label{font-size:13px;color:#8ab4d8;letter-spacing:.4em;margin-bottom:6px}
-.score-value{font-size:clamp(48px,14vw,72px);font-weight:900;color:#d0faff;text-shadow:0 0 30px rgba(77,200,255,.9);font-variant-numeric:tabular-nums;line-height:1}
-.highscore-label{margin-top:20px;font-size:13px;color:#ffd700;letter-spacing:.2em;text-shadow:0 0 15px rgba(255,215,0,.5)}
-.highscore-value{color:#ffd700;font-weight:800}
-.coins-earned{margin-top:16px;font-size:18px;color:#ffd700;font-weight:900;text-shadow:0 0 15px rgba(255,215,0,.7)}
-.instructions{margin-top:24px;font-size:14px;color:#8ab4d8;text-align:center;line-height:1.9;max-width:440px;padding:16px;border-top:1px solid rgba(77,200,255,.15)}
-.instructions .gesture{display:inline-block;padding:2px 10px;background:rgba(77,200,255,.15);border:1px solid rgba(77,200,255,.4);border-radius:6px;font-size:12px;color:#a8f0ff;margin:0 2px}
-.super-line{color:#ff80ff;font-weight:700;margin-top:10px;text-shadow:0 0 10px rgba(255,128,255,.5)}
-#tutorialHint{position:absolute;left:50%;bottom:25%;transform:translateX(-50%);font-size:clamp(16px,4vw,20px);font-weight:700;color:#d0faff;letter-spacing:.15em;text-shadow:0 0 20px rgba(77,200,255,.9);pointer-events:none;z-index:6;opacity:0;transition:opacity .6s;text-align:center;white-space:nowrap}
-#tutorialHint.visible{opacity:1;animation:hintPulse 1.4s ease-in-out infinite}
-@keyframes hintPulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.08)}}
-.shop-coins{font-size:24px;color:#ffd700;font-weight:900;margin-bottom:16px;text-shadow:0 0 20px rgba(255,215,0,.7)}
-.shop-tabs{display:flex;gap:8px;margin-bottom:16px}
-.shopTab{padding:10px 24px;border-radius:10px;background:rgba(255,255,255,.08);color:#8ab4d8;border:1px solid rgba(168,240,255,.25);cursor:pointer;font-size:14px;font-weight:700;letter-spacing:.1em;min-width:unset;box-shadow:none;margin:0;font-family:inherit}
-.shopTab.active{background:linear-gradient(135deg,#4dc8ff,#1a8cd8);color:#001a2e;border-color:#4dc8ff;box-shadow:0 0 20px rgba(77,200,255,.6)}
-.shop-content{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;max-width:640px;max-height:55vh;overflow-y:auto;padding:8px;margin-bottom:16px}
-.shop-item{background:rgba(255,255,255,.05);border:1.5px solid rgba(168,240,255,.2);border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s}
-.shop-item.active{border-color:#4dc8ff;box-shadow:0 0 20px rgba(77,200,255,.5);background:rgba(77,200,255,.08)}
-.shop-preview{width:100%;height:64px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:34px}
-.shop-preview.boats-classic{background:linear-gradient(180deg,#e8b878,#4a2208)}
-.shop-preview.boats-pirate{background:linear-gradient(180deg,#3a3a3a,#000)}
-.shop-preview.boats-crystal{background:linear-gradient(180deg,#a0f0ff,#0080ff);box-shadow:inset 0 0 20px rgba(100,220,255,.8)}
-.shop-preview.boats-golden{background:linear-gradient(180deg,#fff5a0,#c08020);box-shadow:inset 0 0 20px rgba(255,215,0,.6)}
-.shop-preview.walls-crystal{background:linear-gradient(180deg,#80ffcc,#008888)}
-.shop-preview.walls-neon{background:linear-gradient(180deg,#ff80ff,#800080)}
-.shop-preview.walls-lava{background:linear-gradient(180deg,#ffcc00,#ff2200)}
-.shop-preview.walls-ice{background:linear-gradient(180deg,#e0f8ff,#6090d0)}
-.shop-item-name{font-size:13px;font-weight:700;color:#d0faff;text-align:center}
-.shop-item-desc{font-size:11px;color:#8ab4d8;text-align:center}
-.shop-btn{width:100%;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-width:unset;margin:0;box-shadow:none;font-family:inherit;color:#fff}
-.shop-btn.buy{background:linear-gradient(135deg,#ffd700,#cc8800);color:#2a1800;box-shadow:0 0 15px rgba(255,215,0,.5)}
-.shop-btn.owned{background:rgba(100,200,255,.2);color:#d0faff;border:1px solid rgba(168,240,255,.4)}
-.shop-btn.selected{background:rgba(80,200,100,.3);color:#a0ffa0;border:1px solid rgba(100,255,100,.5)}
-.shop-btn:disabled{opacity:.35;cursor:not-allowed}
-</style>
-</head>
-<body>
-<div id="game-container">
-  <canvas id="game"></canvas>
-
-  <div id="hud" class="hidden">
-    <div id="score">0</div>
-    <button id="pauseBtn" aria-label="Pause">⏸</button>
-  </div>
-
-  <div id="tutorialHint"></div>
-
-  <div id="menu" class="overlay">
-    <div id="langBar">
-      <button class="langBtn active" data-lang="de">DE</button>
-      <button class="langBtn" data-lang="en">EN</button>
-      <button class="langBtn" data-lang="es">ES</button>
-      <button class="langBtn" data-lang="fr">FR</button>
-    </div>
-    <h1 class="title">TIDAL</h1>
-    <p class="subtitle" id="menuSubtitle">STEUERE DAS WASSER.<br>NICHT DAS BOOT.</p>
-    <button id="playBtn">▶ SPIELEN</button>
-    <button id="shopBtn">🛒 SHOP</button>
-    <div class="menu-coins">💰 <span id="menuCoins">0</span></div>
-    <div class="menu-highscore"><span id="menuHsLabel">HIGHSCORE</span>: <span id="menuHighscore">0</span></div>
-    <div class="instructions">
-      <span class="gesture" id="holdBadge">GEDRÜCKT HALTEN</span> → <span id="riseText">Wasser steigt</span><br>
-      <span class="gesture" id="releaseBadge">LOSLASSEN</span> → <span id="fallText">Wasser sinkt</span><br><br>
-      <span id="goalText">Manövriere dein Boot durch die Lücken.</span>
-      <div class="super-line" id="superText">⭐ Regenbogen-Bubbles = +25 Punkte</div>
-    </div>
-  </div>
-
-  <div id="shop" class="overlay hidden">
-    <h2 id="shopTitle" style="color:#ffd700;text-shadow:0 0 30px rgba(255,215,0,.8)">SHOP</h2>
-    <div class="shop-coins">💰 <span id="shopCoins">0</span></div>
-    <div class="shop-tabs">
-      <button class="shopTab active" data-tab="boats" id="shopBoatsTab">BOOTE</button>
-      <button class="shopTab" data-tab="walls" id="shopWallsTab">WÄNDE</button>
-    </div>
-    <div id="shopContent" class="shop-content"></div>
-    <button id="closeShopBtn" class="secondary">ZURÜCK</button>
-  </div>
-
-  <div id="gameover" class="overlay hidden">
-    <h2 id="goTitle">GAME OVER</h2>
-    <div class="score-display">
-      <div class="score-label" id="goPointsLabel">PUNKTE</div>
-      <div class="score-value" id="finalScore">0</div>
-      <div class="highscore-label"><span id="goHsLabel">HIGHSCORE</span>: <span class="highscore-value" id="finalHighscore">0</span></div>
-      <div class="coins-earned">💰 +<span id="goCoinsEarned">0</span></div>
-    </div>
-    <button id="retryBtn">NOCHMAL</button>
-    <button id="menuBtn" class="secondary">MENÜ</button>
-  </div>
-
-  <div id="pause" class="overlay hidden">
-    <h2 id="pauseTitle" style="color:#d0faff;text-shadow:0 0 30px rgba(77,200,255,.7)">PAUSE</h2>
-    <button id="resumeBtn">WEITER</button>
-    <button id="quitBtn" class="secondary">MENÜ</button>
-  </div>
-</div>
-
-<script>
-(function(){
-'use strict';
-
-var $ = function(id){ return document.getElementById(id); };
-var canvas = $('game');
-var ctx = canvas.getContext('2d');
-var container = $('game-container');
-var STATE = { MENU: 'menu', PLAYING: 'playing', PAUSED: 'paused', GAMEOVER: 'gameover' };
-var state = STATE.MENU;
-var W = 0, H = 0, DPR = 1;
-var waterY = 0, waterVel = 0, holding = false, gameTime = 0;
-var scrollSpeed = 260, score = 0, distance = 0;
-var highscore = parseInt(localStorage.getItem('tidal_highscore') || '0', 10);
-var screenShake = 0, flashAlpha = 0;
-var boat = { x: 0, y: 0, angle: 0 };
-var obstacles = [], bubbles = [], particles = [], floaters = [];
-var obstacleSpawnTimer = 0, bubbleSpawnTimer = 0, tutorialTimer = 0;
-var lastTime = performance.now();
-var WATER_RISE_SPEED = 420, WATER_FALL_SPEED = 320;
-var WATER_RISE_RESPONSIVENESS = 10, WATER_FALL_RESPONSIVENESS = 6;
-var WATER_MAX_SPEED = 520;
-var BOAT_W = 56, BOAT_H = 38;
-var BUBBLE_RADIUS = 17, SUPER_BUBBLE_RADIUS = 26;
-var SUPER_BUBBLE_CHANCE = 0.06, BUBBLE_WALL_MARGIN = 40;
-
-// ============ SHOP STATE ============
-var coins = parseInt(localStorage.getItem('tidal_coins') || '0', 10);
-var ownedSkins = { boats: ['classic'], walls: ['crystal'] };
-try {
-  var savedOwned = JSON.parse(localStorage.getItem('tidal_owned') || 'null');
-  if (savedOwned && savedOwned.boats && savedOwned.walls) {
-    ownedSkins = savedOwned;
-    if (ownedSkins.boats.indexOf('classic') < 0) ownedSkins.boats.push('classic');
-    if (ownedSkins.walls.indexOf('crystal') < 0) ownedSkins.walls.push('crystal');
-  }
-} catch(e) {}
-var selectedBoat = localStorage.getItem('tidal_boat') || 'classic';
-var selectedWall = localStorage.getItem('tidal_wall') || 'crystal';
-var currentShopTab = 'boats';
-if (ownedSkins.boats.indexOf(selectedBoat) < 0) selectedBoat = 'classic';
-if (ownedSkins.walls.indexOf(selectedWall) < 0) selectedWall = 'crystal';
-
-function saveProgress(){
-  try {
-    localStorage.setItem('tidal_coins', String(coins));
-    localStorage.setItem('tidal_owned', JSON.stringify(ownedSkins));
-    localStorage.setItem('tidal_boat', selectedBoat);
-    localStorage.setItem('tidal_wall', selectedWall);
-  } catch(e) {}
-}
-function updateMenuCoins(){ $('menuCoins').textContent = coins; }
-
-var shopItems = {
-  boats: [
-    {id:'classic', name:'Holzschiff', desc:'Klassisch', price:0, emoji:'🛶'},
-    {id:'pirate', name:'Piratenschiff', desc:'Dunkel & gefährlich', price:100, emoji:'🏴‍☠️'},
-    {id:'crystal', name:'Kristallboot', desc:'Leuchtet blau', price:250, emoji:'💎'},
-    {id:'golden', name:'Goldboot', desc:'Reiner Luxus', price:500, emoji:'👑'}
-  ],
-  walls: [
-    {id:'crystal', name:'Kristall-Türkis', desc:'Standard', price:0, emoji:'💠'},
-    {id:'neon', name:'Neon Pink', desc:'Knallig pink', price:75, emoji:'💜'},
-    {id:'lava', name:'Lava', desc:'Glühend heiß', price:150, emoji:'🔥'},
-    {id:'ice', name:'Eisblau', desc:'Kalt & klar', price:300, emoji:'❄️'}
-  ]
-};
-
-function applyWallSkin(obs){
-  if (selectedWall === 'neon') obs.hue = 300 + Math.random() * 30;
-  else if (selectedWall === 'lava') obs.hue = 5 + Math.random() * 25;
-  else if (selectedWall === 'ice') obs.hue = 200 + Math.random() * 20;
-}
-
-// ============ BUTTONS (sofort registrieren!) ============
-$('playBtn').addEventListener('click', function(){ if(typeof startGame==='function') startGame(); });
-$('retryBtn').addEventListener('click', function(){ if(typeof startGame==='function') startGame(); });
-$('menuBtn').addEventListener('click', function(){ if(typeof goToMenu==='function') goToMenu(); });
-$('pauseBtn').addEventListener('click', function(){ if(typeof pauseGame==='function') pauseGame(); });
-$('resumeBtn').addEventListener('click', function(){ if(typeof resumeGame==='function') resumeGame(); });
-$('quitBtn').addEventListener('click', function(){ if(typeof goToMenu==='function') goToMenu(); });
-$('shopBtn').addEventListener('click', function(){ if(typeof openShop==='function') openShop(); });
-$('closeShopBtn').addEventListener('click', function(){ if(typeof closeShop==='function') closeShop(); });
-
-var shopTabBtns = document.querySelectorAll('.shopTab');
-for(var st=0; st<shopTabBtns.length; st++){
-  shopTabBtns[st].addEventListener('click', function(){ if(typeof switchShopTab==='function') switchShopTab(this.dataset.tab); });
-}
-
-// ============ SPRACHEN ============
-var translations = {
-  de:{subtitle:"STEUERE DAS WASSER.<br>NICHT DAS BOOT.",play:"▶ SPIELEN",shop:"🛒 SHOP",highscore:"HIGHSCORE",hold:"GEDRÜCKT HALTEN",release:"LOSLASSEN",rise:"Wasser steigt",fall:"Wasser sinkt",goal:"Manövriere dein Boot durch die Lücken.",super:"⭐ Regenbogen-Bubbles = +25 Punkte",gameover:"GAME OVER",points:"PUNKTE",retry:"NOCHMAL",menu:"MENÜ",pause:"PAUSE",continueBtn:"WEITER",hint:"GEDRÜCKT HALTEN",shopTitle:"SHOP",shopBoats:"BOOTE",shopWalls:"WÄNDE",shopBack:"ZURÜCK",shopSelect:"AUSWÄHLEN",shopSelected:"✓ AUSGEWÄHLT"},
-  en:{subtitle:"CONTROL THE WATER.<br>NOT THE BOAT.",play:"▶ PLAY",shop:"🛒 SHOP",highscore:"HIGHSCORE",hold:"HOLD PRESSED",release:"RELEASE",rise:"water rises",fall:"water falls",goal:"Navigate your boat through the gaps.",super:"⭐ Rainbow bubbles = +25 points",gameover:"GAME OVER",points:"POINTS",retry:"RETRY",menu:"MENU",pause:"PAUSE",continueBtn:"CONTINUE",hint:"HOLD PRESSED",shopTitle:"SHOP",shopBoats:"BOATS",shopWalls:"WALLS",shopBack:"BACK",shopSelect:"SELECT",shopSelected:"✓ SELECTED"},
-  es:{subtitle:"CONTROLA EL AGUA.<br>NO EL BARCO.",play:"▶ JUGAR",shop:"🛒 TIENDA",highscore:"RÉCORD",hold:"MANTÉN PULSADO",release:"SUELTA",rise:"el agua sube",fall:"el agua baja",goal:"Navega tu barco por los huecos.",super:"⭐ Burbujas arcoíris = +25 puntos",gameover:"FIN DEL JUEGO",points:"PUNTOS",retry:"OTRA VEZ",menu:"MENÚ",pause:"PAUSA",continueBtn:"CONTINUAR",hint:"MANTÉN PULSADO",shopTitle:"TIENDA",shopBoats:"BARCOS",shopWalls:"MUROS",shopBack:"VOLVER",shopSelect:"ELEGIR",shopSelected:"✓ ELEGIDO"},
-  fr:{subtitle:"CONTRÔLE L'EAU.<br>PAS LE BATEAU.",play:"▶ JOUER",shop:"🛒 BOUTIQUE",highscore:"RECORD",hold:"MAINTENIR",release:"RELÂCHER",rise:"l'eau monte",fall:"l'eau descend",goal:"Navigue ton bateau entre les brèches.",super:"⭐ Bulles arc-en-ciel = +25 points",gameover:"PARTIE TERMINÉE",points:"POINTS",retry:"REJOUER",menu:"MENU",pause:"PAUSE",continueBtn:"CONTINUER",hint:"MAINTENIR",shopTitle:"BOUTIQUE",shopBoats:"BATEAUX",shopWalls:"MURS",shopBack:"RETOUR",shopSelect:"CHOISIR",shopSelected:"✓ CHOISI"}
-};
-var currentLang = localStorage.getItem('tidal_lang') || 'de';
-if(!translations[currentLang]) currentLang = 'de';
-
-function applyLanguage(lang){
-  if(!translations[lang]) return;
-  currentLang = lang;
-  try{ localStorage.setItem('tidal_lang', lang); }catch(e){}
-  var t = translations[lang];
-  $('menuSubtitle').innerHTML = t.subtitle;
-  $('playBtn').textContent = t.play;
-  $('shopBtn').textContent = t.shop;
-  $('menuHsLabel').textContent = t.highscore;
-  $('holdBadge').textContent = t.hold;
-  $('releaseBadge').textContent = t.release;
-  $('riseText').textContent = t.rise;
-  $('fallText').textContent = t.fall;
-  $('goalText').textContent = t.goal;
-  $('superText').textContent = t.super;
-  $('goTitle').textContent = t.gameover;
-  $('goPointsLabel').textContent = t.points;
-  $('goHsLabel').textContent = t.highscore;
-  $('retryBtn').textContent = t.retry;
-  $('menuBtn').textContent = t.menu;
-  $('pauseTitle').textContent = t.pause;
-  $('resumeBtn').textContent = t.continueBtn;
-  $('quitBtn').textContent = t.menu;
-  $('shopTitle').textContent = t.shopTitle;
-  $('shopBoatsTab').textContent = t.shopBoats;
-  $('shopWallsTab').textContent = t.shopWalls;
-  $('closeShopBtn').textContent = t.shopBack;
-  var lb = document.querySelectorAll('.langBtn');
-  for(var i=0;i<lb.length;i++){
-    if(lb[i].dataset.lang === lang) lb[i].classList.add('active');
-    else lb[i].classList.remove('active');
-  }
-  document.documentElement.lang = lang;
-  if (currentShopTab) renderShop();
-}
-var langBtns = document.querySelectorAll('.langBtn');
-for(var i=0;i<langBtns.length;i++){
-  langBtns[i].addEventListener('click', function(e){ e.stopPropagation(); applyLanguage(this.dataset.lang); });
-}
-
-// ============ SHOP LOGIK ============
-function openShop(){
-  $('menu').classList.add('hidden');
-  $('shop').classList.remove('hidden');
-  currentShopTab = 'boats';
-  var tabs = document.querySelectorAll('.shopTab');
-  for(var i=0;i<tabs.length;i++){
-    if(tabs[i].dataset.tab === 'boats') tabs[i].classList.add('active');
-    else tabs[i].classList.remove('active');
-  }
-  renderShop();
-}
-function closeShop(){
-  $('shop').classList.add('hidden');
-  $('menu').classList.remove('hidden');
-  updateMenuCoins();
-}
-function switchShopTab(tab){
-  currentShopTab = tab;
-  var tabs = document.querySelectorAll('.shopTab');
-  for(var i=0;i<tabs.length;i++){
-    if(tabs[i].dataset.tab === tab) tabs[i].classList.add('active');
-    else tabs[i].classList.remove('active');
-  }
-  renderShop();
-}
-function renderShop(){
-  $('shopCoins').textContent = coins;
-  var t = translations[currentLang];
-  var items = shopItems[currentShopTab];
-  var html = '';
-  for(var i=0;i<items.length;i++){
-    var item = items[i];
-    var owned = ownedSkins[currentShopTab].indexOf(item.id) >= 0;
-    var sel = (currentShopTab === 'boats' ? selectedBoat : selectedWall) === item.id;
-    var label, cls, action, dis = '';
-    if(sel){ label = t.shopSelected; cls = 'shop-btn selected'; action = 'none'; }
-    else if(owned){ label = t.shopSelect; cls = 'shop-btn owned'; action = 'select'; }
-    else { label = item.price + ' 💰'; cls = 'shop-btn buy'; action = 'buy'; if(coins < item.price) dis = ' disabled'; }
-    html += '<div class="shop-item'+(sel?' active':'')+'">' +
-      '<div class="shop-preview '+currentShopTab+'-'+item.id+'">'+item.emoji+'</div>' +
-      '<div class="shop-item-name">'+item.name+'</div>' +
-      '<div class="shop-item-desc">'+item.desc+'</div>' +
-      '<button class="'+cls+'" data-action="'+action+'" data-tab="'+currentShopTab+'" data-id="'+item.id+'"'+dis+'>'+label+'</button>' +
-      '</div>';
-  }
-  $('shopContent').innerHTML = html;
-  var btns = $('shopContent').querySelectorAll('button');
-  for(var j=0;j<btns.length;j++) btns[j].addEventListener('click', handleShopAction);
-}
-function handleShopAction(){
-  var action = this.dataset.action;
-  var tab = this.dataset.tab;
-  var id = this.dataset.id;
-  if(action === 'none') return;
-  if(action === 'select'){
-    if(tab === 'boats') selectedBoat = id;
-    else selectedWall = id;
-    saveProgress();
-    renderShop();
-  } else if(action === 'buy'){
-    var item = null;
-    for(var i=0;i<shopItems[tab].length;i++){
-      if(shopItems[tab][i].id === id){ item = shopItems[tab][i]; break; }
-    }
-    if(!item || coins < item.price) return;
-    coins -= item.price;
-    ownedSkins[tab].push(id);
-    if(tab === 'boats') selectedBoat = id;
-    else selectedWall = id;
-    saveProgress();
-    updateMenuCoins();
-    renderShop();
-  }
-}
-
-// ============ RESIZE ============
-function resize(){
-  var rect = container.getBoundingClientRect();
-  DPR = Math.min(window.devicePixelRatio || 1, 2);
-  W = rect.width; H = rect.height;
-  canvas.width = Math.floor(W*DPR); canvas.height = Math.floor(H*DPR);
-  canvas.style.width = W+'px'; canvas.style.height = H+'px';
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-}
-window.addEventListener('resize', resize);
-window.addEventListener('orientationchange', function(){ setTimeout(resize, 100); });
-resize();
-
-// ============ PARTIKEL ============
-function spawnParticle(x,y,vx,vy,o){
-  o = o || {};
-  if(particles.length > 340) return;
-  particles.push({x:x,y:y,vx:vx,vy:vy,life:o.life||1,maxLife:o.life||1,size:o.size||3,color:o.color||'rgba(168,240,255,0.8)',gravity:o.gravity||0});
-}
-function spawnDirectionalSplash(x, y, intensity, rising){
-  var count = Math.max(1, Math.floor(intensity*9));
-  for(var i=0;i<count;i++){
-    if(rising){
-      var a1 = -Math.PI/2 + (Math.random()-0.5)*Math.PI*0.9;
-      var s1 = 90 + Math.random()*220*intensity;
-      spawnParticle(x+(Math.random()-0.5)*BOAT_W*0.9, y+2+Math.random()*4, Math.cos(a1)*s1, Math.sin(a1)*s1,
-        {life:0.5+Math.random()*0.35,size:1.5+Math.random()*2.2,color:'rgba(210,245,255,'+(0.7+Math.random()*0.3)+')',gravity:420});
-    } else {
-      var side = Math.random()<0.5?-1:1;
-      var a2 = (side>0?0:Math.PI) + (Math.random()-0.5)*Math.PI*0.55;
-      var s2 = 70 + Math.random()*170*intensity;
-      spawnParticle(x+side*BOAT_W*0.42, y+3+Math.random()*5, Math.cos(a2)*s2, Math.sin(a2)*s2-30,
-        {life:0.45+Math.random()*0.35,size:1.4+Math.random()*2.5,color:'rgba(190,235,255,'+(0.6+Math.random()*0.35)+')',gravity:340});
-    }
-  }
-}
-function spawnExplosion(x,y){
-  for(var i=0;i<36;i++){
-    var a = Math.random()*Math.PI*2, s = 100+Math.random()*380;
-    spawnParticle(x,y,Math.cos(a)*s,Math.sin(a)*s,
-      {life:0.7+Math.random()*0.7,size:3+Math.random()*4,color:'rgba(255,'+((120+Math.random()*100)|0)+','+((100+Math.random()*100)|0)+',1)',gravity:220});
-  }
-}
-
-// ============ HINDERNISSE ============
-function Obstacle(x, gapY, gapHeight){
-  this.x = x; this.gapY = gapY; this.gapHeight = gapHeight;
-  this.width = Math.max(64, W*0.11);
-  this.passed = false;
-  this.hue = 175 + Math.random()*45;
-  this.glowPulse = Math.random()*Math.PI*2;
-}
-function spawnObstacle(){
-  var gapHeightFactor = Math.max(0.22, 0.38 - distance*0.0015);
-  var gapHeight = H*gapHeightFactor;
-  var minY = H*0.12, maxY = H*0.85 - gapHeight;
-  var gapY = minY + Math.random()*Math.max(0, maxY-minY);
-  var obs = new Obstacle(W+50, gapY, gapHeight);
-  applyWallSkin(obs);
-  obstacles.push(obs);
-}
-
-// ============ BUBBLE SPAWN ============
-function spawnBubble(baseX){
-  var targetObs = null, closestDist = Infinity;
-  for(var i=0;i<obstacles.length;i++){
-    var obs = obstacles[i];
-    if(obs.x + obs.width < baseX - 60) continue;
-    if(obs.x > baseX + 200) continue;
-    var dist = Math.abs(obs.x - baseX);
-    if(dist < closestDist){ closestDist = dist; targetObs = obs; }
-  }
-  if(!targetObs) return false;
-  var isSuper = Math.random() < SUPER_BUBBLE_CHANCE;
-  var r = isSuper ? SUPER_BUBBLE_RADIUS : BUBBLE_RADIUS;
-  var safeTop = targetObs.gapY + r + BUBBLE_WALL_MARGIN;
-  var safeBottom = targetObs.gapY + targetObs.gapHeight - r - BUBBLE_WALL_MARGIN;
-  if(safeTop >= safeBottom) return false;
-  var y = (safeTop + safeBottom) / 2;
-  bubbles.push({x:baseX, y:y, r:r, isSuper:isSuper, bob:Math.random()*Math.PI*2, pulse:Math.random()*Math.PI*2, rotation:Math.random()*Math.PI*2});
-  return true;
-}
-
-// ============================================================
-//  ⚠️ TEIL 1 ENDE – HIER GEHT ES IN TEIL 2 WEITER!
-//  ⚠️ Datei JETZT NICHT speichern/öffnen – warte auf Teil 2!
-//  ⚠️ Schreib einfach "weiter" und ich schicke den Rest.
-// ============================================================
- /* ===== ADMIN PANEL v2.1 ===== */
-#adminTrigger{position:absolute;bottom:max(16px,env(safe-area-inset-bottom));left:max(16px,env(safe-area-inset-left));width:40px;height:40px;border-radius:50%;padding:0;min-width:unset;background:rgba(255,255,255,0.04);border:1px solid rgba(168,240,255,0.12);color:rgba(255,255,255,0.25);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:none;margin:0;font-family:inherit;transition:all 0.3s;z-index:15}
-#adminTrigger:hover{color:#ff80ff;background:rgba(255,128,255,0.12);border-color:rgba(255,128,255,0.4);box-shadow:0 0 20px rgba(255,128,255,0.4)}
-.admin-input{width:100%;max-width:320px;padding:14px 20px;border-radius:10px;background:rgba(0,0,0,0.5);border:2px solid rgba(168,240,255,0.4);color:#fff;font-size:18px;font-family:inherit;text-align:center;letter-spacing:0.3em;outline:none;margin:16px 0;text-transform:uppercase}
-.admin-input:focus{border-color:#ff80ff;box-shadow:0 0 25px rgba(255,128,255,0.5)}
+#adminTrigger{position:absolute;bottom:max(16px,env(safe-area-inset-bottom));left:max(16px,env(safe-area-inset-left));width:40px;height:40px;border-radius:50%;padding:0;min-width:unset;background:rgba(255,255,255,.04);border:1px solid rgba(168,240,255,.12);color:rgba(255,255,255,.25);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:none;margin:0;font-family:inherit;transition:all .3s;z-index:15}
+#adminTrigger:hover{color:#ff80ff;background:rgba(255,128,255,.12);border-color:rgba(255,128,255,.4);box-shadow:0 0 20px rgba(255,128,255,.4)}
+.admin-input{width:100%;max-width:320px;padding:14px 20px;border-radius:10px;background:rgba(0,0,0,.5);border:2px solid rgba(168,240,255,.4);color:#fff;font-size:18px;font-family:inherit;text-align:center;letter-spacing:.3em;outline:none;margin:16px 0;text-transform:uppercase}
+.admin-input:focus{border-color:#ff80ff;box-shadow:0 0 25px rgba(255,128,255,.5)}
 .admin-error{color:#ff6b6b;font-size:14px;min-height:20px;margin-bottom:8px;text-align:center;font-weight:700}
 .admin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:520px;width:100%;margin:12px 0}
-.admin-btn{padding:14px 12px;border-radius:10px;background:linear-gradient(135deg,#ff80ff,#8000ff);border:none;color:#fff;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;letter-spacing:0.02em;min-width:unset;box-shadow:0 4px 15px rgba(200,0,255,0.4);margin:0}
-.admin-btn:active{transform:scale(0.96)}
-.admin-btn.danger{background:linear-gradient(135deg,#ff5757,#cc0000);box-shadow:0 4px 15px rgba(255,0,0,0.4)}
-.admin-btn.success{background:linear-gradient(135deg,#4dff80,#00aa44);color:#002a10;box-shadow:0 4px 15px rgba(0,255,100,0.4)}
+.admin-btn{padding:14px 12px;border-radius:10px;background:linear-gradient(135deg,#ff80ff,#8000ff);border:none;color:#fff;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;letter-spacing:.02em;min-width:unset;box-shadow:0 4px 15px rgba(200,0,255,.4);margin:0}
+.admin-btn:active{transform:scale(.96)}
+.admin-btn.danger{background:linear-gradient(135deg,#ff5757,#cc0000);box-shadow:0 4px 15px rgba(255,0,0,.4)}
+.admin-btn.success{background:linear-gradient(135deg,#4dff80,#00aa44);color:#002a10;box-shadow:0 4px 15px rgba(0,255,100,.4)}
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="game"></canvas>
+  <div id="hud" class="hidden">
+    <div id="score">0</div>
+    <button id="pauseBtn" aria-label="Pause">⏸</button>
+  </div>
+  <div id="tutorialHint"></div>
+  <div id="menu" class="overlay">
+    <div id="langBar">
+      <button class="langBtn active" data-lang="de">DE</button>
+      <button class="langBtn" data-lang="en">EN</button>
+      <button class="langBtn" data-lang="es">ES</button>
+      <button class="langBtn" data-lang="fr">FR</button>
+    </div>
+    <h1 class="title">TIDAL</h1>
+    <p class="subtitle" id="menuSubtitle">STEUERE DAS WASSER.<br>NICHT DAS BOOT.</p>
+    <button id="playBtn">▶ SPIELEN</button>
+    <button id="shopBtn">🛒 SHOP</button>
+    <div class="menu-coins">💰 <span id="menuCoins">0</span></div>
+    <div class="menu-highscore"><span id="menuHsLabel">HIGHSCORE</span>: <span id="menuHighscore">0</span></div>
+    <div class="instructions">
+      <span class="gesture" id="holdBadge">GEDRÜCKT HALTEN</span> → <span id="riseText">Wasser steigt</span><br>
+      <span class="gesture" id="releaseBadge">LOSLASSEN</span> → <span id="fallText">Wasser sinkt</span><br><br>
+      <span id="goalText">Manövriere dein Boot durch die Lücken.</span>
+      <div class="super-line" id="superText">⭐ Regenbogen-Bubbles = +25 Punkte</div>
+    </div>
     <button id="adminTrigger" title="Admin">⚙</button>
- <div id="menu" class="overlay">
-  ... bestehender Menü-Inhalt ...
-  <div class="instructions">...</div>
-  <button id="adminTrigger" title="Admin">⚙</button>
-</div>
-          <div id="adminLogin" class="overlay hidden" style="background:radial-gradient(circle at center,rgba(80,0,80,0.92),rgba(20,0,30,0.98))">
-    <h2 style="color:#ff80ff;text-shadow:0 0 30px rgba(255,128,255,0.8)">🔐 ADMIN</h2>
-    <p style="color:#8ab4d8;font-size:13px;margin-bottom:12px;letter-spacing:0.1em;text-align:center">GEHEIMEN CODE EINGEBEN</p>
+  </div>
+  <div id="shop" class="overlay hidden">
+    <h2 id="shopTitle" style="color:#ffd700;text-shadow:0 0 30px rgba(255,215,0,.8)">SHOP</h2>
+    <div class="shop-coins">💰 <span id="shopCoins">0</span></div>
+    <div class="shop-tabs">
+      <button class="shopTab active" data-tab="boats" id="shopBoatsTab">BOOTE</button>
+      <button class="shopTab" data-tab="walls" id="shopWallsTab">WÄNDE</button>
+    </div>
+    <div id="shopContent" class="shop-content"></div>
+    <button id="closeShopBtn" class="secondary">ZURÜCK</button>
+  </div>
+  <div id="gameover" class="overlay hidden">
+    <h2 id="goTitle">GAME OVER</h2>
+    <div class="score-display">
+      <div class="score-label" id="goPointsLabel">PUNKTE</div>
+      <div class="score-value" id="finalScore">0</div>
+      <div class="highscore-label"><span id="goHsLabel">HIGHSCORE</span>: <span class="highscore-value" id="finalHighscore">0</span></div>
+      <div class="coins-earned">💰 +<span id="goCoinsEarned">0</span></div>
+    </div>
+    <button id="retryBtn">NOCHMAL</button>
+    <button id="menuBtn" class="secondary">MENÜ</button>
+  </div>
+  <div id="pause" class="overlay hidden">
+    <h2 id="pauseTitle" style="color:#d0faff;text-shadow:0 0 30px rgba(77,200,255,.7)">PAUSE</h2>
+    <button id="resumeBtn">WEITER</button>
+    <button id="quitBtn" class="secondary">MENÜ</button>
+  </div>
+  <div id="adminLogin" class="overlay hidden" style="background:radial-gradient(circle at center,rgba(80,0,80,.92),rgba(20,0,30,.98))">
+    <h2 style="color:#ff80ff;text-shadow:0 0 30px rgba(255,128,255,.8)">🔐 ADMIN</h2>
+    <p style="color:#8ab4d8;font-size:13px;margin-bottom:12px;letter-spacing:.1em;text-align:center">GEHEIMEN CODE EINGEBEN</p>
     <input type="password" id="adminCodeInput" class="admin-input" placeholder="••••••••" maxlength="32" autocomplete="off">
     <div id="adminError" class="admin-error"></div>
     <button id="adminLoginBtn">EINLOGGEN</button>
     <button id="adminCancelBtn" class="secondary">ABBRECHEN</button>
   </div>
-
-  <div id="adminPanel" class="overlay hidden" style="background:radial-gradient(circle at center,rgba(80,0,80,0.92),rgba(20,0,30,0.98))">
-    <h2 style="color:#ff80ff;text-shadow:0 0 30px rgba(255,128,255,0.8)">👑 ADMIN PANEL</h2>
+  <div id="adminPanel" class="overlay hidden" style="background:radial-gradient(circle at center,rgba(80,0,80,.92),rgba(20,0,30,.98))">
+    <h2 style="color:#ff80ff;text-shadow:0 0 30px rgba(255,128,255,.8)">👑 ADMIN PANEL</h2>
     <div style="color:#ffd700;font-size:16px;margin-bottom:8px;font-weight:900">💰 <span id="adminCoins">0</span></div>
     <div class="admin-grid">
       <button class="admin-btn success" data-admin="coins1000">💰 +1000</button>
@@ -907,15 +155,779 @@ function spawnBubble(baseX){
     </div>
     <button id="adminCloseBtn" class="secondary">ZURÜCK</button>
   </div>
-      <div id="pause" class="overlay hidden">
-    ...
-  </div>
+</div>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var canvas = $('game');
+var ctx = canvas.getContext('2d');
+var container = $('game-container');
+var STATE = { MENU:'menu', PLAYING:'playing', PAUSED:'paused', GAMEOVER:'gameover' };
+var state = STATE.MENU;
+var W = 0, H = 0, DPR = 1;
+var waterY = 0, waterVel = 0, holding = false, gameTime = 0;
+var scrollSpeed = 260, score = 0, distance = 0;
+var highscore = parseInt(localStorage.getItem('tidal_highscore') || '0', 10);
+var screenShake = 0, flashAlpha = 0;
+var boat = { x:0, y:0, angle:0 };
+var obstacles = [], bubbles = [], particles = [], floaters = [];
+var obstacleSpawnTimer = 0, bubbleSpawnTimer = 0, tutorialTimer = 0;
+var lastTime = performance.now();
+var WATER_RISE_SPEED = 420, WATER_FALL_SPEED = 320;
+var WATER_RISE_RESPONSIVENESS = 10, WATER_FALL_RESPONSIVENESS = 6;
+var WATER_MAX_SPEED = 520;
+var BOAT_W = 56, BOAT_H = 38;
+var BUBBLE_RADIUS = 17, SUPER_BUBBLE_RADIUS = 26;
+var SUPER_BUBBLE_CHANCE = 0.06, BUBBLE_WALL_MARGIN = 40;
+var coins = parseInt(localStorage.getItem('tidal_coins') || '0', 10);
+var ownedSkins = { boats:['classic'], walls:['crystal'] };
+try{ var s = JSON.parse(localStorage.getItem('tidal_owned') || 'null'); if(s && s.boats && s.walls){ ownedSkins = s; if(ownedSkins.boats.indexOf('classic')<0) ownedSkins.boats.push('classic'); if(ownedSkins.walls.indexOf('crystal')<0) ownedSkins.walls.push('crystal'); } }catch(e){}
+var selectedBoat = localStorage.getItem('tidal_boat') || 'classic';
+var selectedWall = localStorage.getItem('tidal_wall') || 'crystal';
+var currentShopTab = 'boats';
+if(ownedSkins.boats.indexOf(selectedBoat)<0) selectedBoat = 'classic';
+if(ownedSkins.walls.indexOf(selectedWall)<0) selectedWall = 'crystal';
+function saveProgress(){ try{ localStorage.setItem('tidal_coins', String(coins)); localStorage.setItem('tidal_owned', JSON.stringify(ownedSkins)); localStorage.setItem('tidal_boat', selectedBoat); localStorage.setItem('tidal_wall', selectedWall); }catch(e){} }
+function updateMenuCoins(){ $('menuCoins').textContent = coins; }
+var shopItems = {
+  boats: [
+    {id:'classic', name:'Holzschiff', desc:'Klassisch', price:0, emoji:'🛶'},
+    {id:'pirate', name:'Piratenschiff', desc:'Dunkel & gefährlich', price:100, emoji:'🏴‍☠️'},
+    {id:'crystal', name:'Kristallboot', desc:'Leuchtet blau', price:250, emoji:'💎'},
+    {id:'golden', name:'Goldboot', desc:'Reiner Luxus', price:500, emoji:'👑'}
+  ],
+  walls: [
+    {id:'crystal', name:'Kristall-Türkis', desc:'Standard', price:0, emoji:'💠'},
+    {id:'neon', name:'Neon Pink', desc:'Knallig pink', price:75, emoji:'💜'},
+    {id:'lava', name:'Lava', desc:'Glühend heiß', price:150, emoji:'🔥'},
+    {id:'ice', name:'Eisblau', desc:'Kalt & klar', price:300, emoji:'❄️'}
+  ]
+};
+function applyWallSkin(obs){ if(selectedWall==='neon') obs.hue = 300+Math.random()*30; else if(selectedWall==='lava') obs.hue = 5+Math.random()*25; else if(selectedWall==='ice') obs.hue = 200+Math.random()*20; }
+$('playBtn').addEventListener('click', function(){ if(typeof startGame==='function') startGame(); });
+$('retryBtn').addEventListener('click', function(){ if(typeof startGame==='function') startGame(); });
+$('menuBtn').addEventListener('click', function(){ if(typeof goToMenu==='function') goToMenu(); });
+$('pauseBtn').addEventListener('click', function(){ if(typeof pauseGame==='function') pauseGame(); });
+$('resumeBtn').addEventListener('click', function(){ if(typeof resumeGame==='function') resumeGame(); });
+$('quitBtn').addEventListener('click', function(){ if(typeof goToMenu==='function') goToMenu(); });
+$('shopBtn').addEventListener('click', function(){ if(typeof openShop==='function') openShop(); });
+$('closeShopBtn').addEventListener('click', function(){ if(typeof closeShop==='function') closeShop(); });
+var shopTabBtns = document.querySelectorAll('.shopTab');
+for(var st=0; st<shopTabBtns.length; st++){ shopTabBtns[st].addEventListener('click', function(){ if(typeof switchShopTab==='function') switchShopTab(this.dataset.tab); }); }
+var translations = {
+  de:{subtitle:"STEUERE DAS WASSER.<br>NICHT DAS BOOT.",play:"▶ SPIELEN",shop:"🛒 SHOP",highscore:"HIGHSCORE",hold:"GEDRÜCKT HALTEN",release:"LOSLASSEN",rise:"Wasser steigt",fall:"Wasser sinkt",goal:"Manövriere dein Boot durch die Lücken.",super:"⭐ Regenbogen-Bubbles = +25 Punkte",gameover:"GAME OVER",points:"PUNKTE",retry:"NOCHMAL",menu:"MENÜ",pause:"PAUSE",continueBtn:"WEITER",hint:"GEDRÜCKT HALTEN",shopTitle:"SHOP",shopBoats:"BOOTE",shopWalls:"WÄNDE",shopBack:"ZURÜCK",shopSelect:"AUSWÄHLEN",shopSelected:"✓ AUSGEWÄHLT"},
+  en:{subtitle:"CONTROL THE WATER.<br>NOT THE BOAT.",play:"▶ PLAY",shop:"🛒 SHOP",highscore:"HIGHSCORE",hold:"HOLD PRESSED",release:"RELEASE",rise:"water rises",fall:"water falls",goal:"Navigate your boat through the gaps.",super:"⭐ Rainbow bubbles = +25 points",gameover:"GAME OVER",points:"POINTS",retry:"RETRY",menu:"MENU",pause:"PAUSE",continueBtn:"CONTINUE",hint:"HOLD PRESSED",shopTitle:"SHOP",shopBoats:"BOATS",shopWalls:"WALLS",shopBack:"BACK",shopSelect:"SELECT",shopSelected:"✓ SELECTED"},
+  es:{subtitle:"CONTROLA EL AGUA.<br>NO EL BARCO.",play:"▶ JUGAR",shop:"🛒 TIENDA",highscore:"RÉCORD",hold:"MANTÉN PULSADO",release:"SUELTA",rise:"el agua sube",fall:"el agua baja",goal:"Navega tu barco por los huecos.",super:"⭐ Burbujas arcoíris = +25 puntos",gameover:"FIN DEL JUEGO",points:"PUNTOS",retry:"OTRA VEZ",menu:"MENÚ",pause:"PAUSA",continueBtn:"CONTINUAR",hint:"MANTÉN PULSADO",shopTitle:"TIENDA",shopBoats:"BARCOS",shopWalls:"MUROS",shopBack:"VOLVER",shopSelect:"ELEGIR",shopSelected:"✓ ELEGIDO"},
+  fr:{subtitle:"CONTRÔLE L'EAU.<br>PAS LE BATEAU.",play:"▶ JOUER",shop:"🛒 BOUTIQUE",highscore:"RECORD",hold:"MAINTENIR",release:"RELÂCHER",rise:"l'eau monte",fall:"l'eau descend",goal:"Navigue ton bateau entre les brèches.",super:"⭐ Bulles arc-en-ciel = +25 points",gameover:"PARTIE TERMINÉE",points:"POINTS",retry:"REJOUER",menu:"MENU",pause:"PAUSE",continueBtn:"CONTINUER",hint:"MAINTENIR",shopTitle:"BOUTIQUE",shopBoats:"BATEAUX",shopWalls:"MURS",shopBack:"RETOUR",shopSelect:"CHOISIR",shopSelected:"✓ CHOISI"}
+};
+var currentLang = localStorage.getItem('tidal_lang') || 'de';
+if(!translations[currentLang]) currentLang = 'de';
+function applyLanguage(lang){
+  if(!translations[lang]) return;
+  currentLang = lang;
+  try{ localStorage.setItem('tidal_lang', lang); }catch(e){}
+  var t = translations[lang];
+  $('menuSubtitle').innerHTML = t.subtitle;
+  $('playBtn').textContent = t.play;
+  $('shopBtn').textContent = t.shop;
+  $('menuHsLabel').textContent = t.highscore;
+  $('holdBadge').textContent = t.hold;
+  $('releaseBadge').textContent = t.release;
+  $('riseText').textContent = t.rise;
+  $('fallText').textContent = t.fall;
+  $('goalText').textContent = t.goal;
+  $('superText').textContent = t.super;
+  $('goTitle').textContent = t.gameover;
+  $('goPointsLabel').textContent = t.points;
+  $('goHsLabel').textContent = t.highscore;
+  $('retryBtn').textContent = t.retry;
+  $('menuBtn').textContent = t.menu;
+  $('pauseTitle').textContent = t.pause;
+  $('resumeBtn').textContent = t.continueBtn;
+  $('quitBtn').textContent = t.menu;
+  $('shopTitle').textContent = t.shopTitle;
+  $('shopBoatsTab').textContent = t.shopBoats;
+  $('shopWallsTab').textContent = t.shopWalls;
+  $('closeShopBtn').textContent = t.shopBack;
+  var lb = document.querySelectorAll('.langBtn');
+  for(var i=0;i<lb.length;i++){ if(lb[i].dataset.lang===lang) lb[i].classList.add('active'); else lb[i].classList.remove('active'); }
+  document.documentElement.lang = lang;
+  if(currentShopTab) renderShop();
+}
+var langBtns = document.querySelectorAll('.langBtn');
+for(var i=0;i<langBtns.length;i++){ langBtns[i].addEventListener('click', function(e){ e.stopPropagation(); applyLanguage(this.dataset.lang); }); }
+function openShop(){ $('menu').classList.add('hidden'); $('shop').classList.remove('hidden'); currentShopTab='boats'; var t=document.querySelectorAll('.shopTab'); for(var i=0;i<t.length;i++){ if(t[i].dataset.tab==='boats') t[i].classList.add('active'); else t[i].classList.remove('active'); } renderShop(); }
+function closeShop(){ $('shop').classList.add('hidden'); $('menu').classList.remove('hidden'); updateMenuCoins(); }
+function switchShopTab(tab){ currentShopTab=tab; var t=document.querySelectorAll('.shopTab'); for(var i=0;i<t.length;i++){ if(t[i].dataset.tab===tab) t[i].classList.add('active'); else t[i].classList.remove('active'); } renderShop(); }
+function renderShop(){
+  $('shopCoins').textContent = coins;
+  var t = translations[currentLang];
+  var items = shopItems[currentShopTab];
+  var html = '';
+  for(var i=0;i<items.length;i++){
+    var item = items[i];
+    var owned = ownedSkins[currentShopTab].indexOf(item.id) >= 0;
+    var sel = (currentShopTab==='boats'?selectedBoat:selectedWall) === item.id;
+    var label, cls, action, dis='';
+    if(sel){ label=t.shopSelected; cls='shop-btn selected'; action='none'; }
+    else if(owned){ label=t.shopSelect; cls='shop-btn owned'; action='select'; }
+    else{ label=item.price+' 💰'; cls='shop-btn buy'; action='buy'; if(coins<item.price) dis=' disabled'; }
+    html += '<div class="shop-item'+(sel?' active':'')+'">'
+      +'<div class="shop-preview '+currentShopTab+'-'+item.id+'">'+item.emoji+'</div>'
+      +'<div class="shop-item-name">'+item.name+'</div>'
+      +'<div class="shop-item-desc">'+item.desc+'</div>'
+      +'<button class="'+cls+'" data-action="'+action+'" data-tab="'+currentShopTab+'" data-id="'+item.id+'"'+dis+'>'+label+'</button>'
+      +'</div>';
+  }
+  $('shopContent').innerHTML = html;
+  var btns = $('shopContent').querySelectorAll('button');
+  for(var j=0;j<btns.length;j++) btns[j].addEventListener('click', handleShopAction);
+}
+function handleShopAction(){
+  var action = this.dataset.action;
+  var tab = this.dataset.tab;
+  var id = this.dataset.id;
+  if(action==='none') return;
+  if(action==='select'){ if(tab==='boats') selectedBoat=id; else selectedWall=id; saveProgress(); renderShop(); }
+  else if(action==='buy'){
+    var item = null;
+    for(var i=0;i<shopItems[tab].length;i++){ if(shopItems[tab][i].id===id){ item=shopItems[tab][i]; break; } }
+    if(!item || coins<item.price) return;
+    coins -= item.price;
+    ownedSkins[tab].push(id);
+    if(tab==='boats') selectedBoat=id; else selectedWall=id;
+    saveProgress(); updateMenuCoins(); renderShop();
+  }
+}
+// ============================================
+// >>> HIER TEIL 2 EINFÜGEN (kommt in nächster Nachricht) <<<
+// ============================================
+ // ============ INPUT ============
+function pointerDown(e){ if(e && e.preventDefault) e.preventDefault(); if(state===STATE.PLAYING) holding=true; }
+function pointerUp(e){ if(e && e.preventDefault) e.preventDefault(); holding=false; }
+canvas.addEventListener('pointerdown', pointerDown, {passive:false});
+window.addEventListener('pointerup', pointerUp, {passive:false});
+window.addEventListener('pointercancel', pointerUp, {passive:false});
+canvas.addEventListener('touchstart', function(e){e.preventDefault();}, {passive:false});
+canvas.addEventListener('touchmove', function(e){e.preventDefault();}, {passive:false});
+window.addEventListener('keydown', function(e){ if(e.code==='Space'||e.code==='ArrowUp'){ if(state===STATE.PLAYING) holding=true; e.preventDefault(); } });
+window.addEventListener('keyup', function(e){ if(e.code==='Space'||e.code==='ArrowUp'){ holding=false; e.preventDefault(); } });
 
-  <!-- NEU: Admin-Login + Admin-Panel hier einfügen -->
-  <div id="adminLogin" class="overlay hidden">...</div>
-  <div id="adminPanel" class="overlay hidden">...</div>
-</div>  ← dieses </div> schließt #game-container
-// ============ ADMIN PANEL v2.1 ============
+// ============ GAME FLOW ============
+function startGame(){
+  state = STATE.PLAYING;
+  gameTime=0; score=0; distance=0;
+  waterY=H*0.5; waterVel=0; holding=false; scrollSpeed=260;
+  obstacles=[]; bubbles=[]; particles=[]; floaters=[];
+  obstacleSpawnTimer=1.3; bubbleSpawnTimer=1.2;
+  screenShake=0; flashAlpha=0; tutorialTimer=2.6;
+  boat.x = Math.max(W*0.22, 80);
+  boat.y = waterY - BOAT_H*0.4;
+  boat.angle = 0;
+  $('score').textContent = '0';
+  $('tutorialHint').textContent = translations[currentLang].hint;
+  $('tutorialHint').classList.add('visible');
+  $('menu').classList.add('hidden');
+  $('shop').classList.add('hidden');
+  $('gameover').classList.add('hidden');
+  $('pause').classList.add('hidden');
+  $('hud').classList.remove('hidden');
+  lastTime = performance.now();
+}
+function goToMenu(){
+  state = STATE.MENU;
+  $('menuHighscore').textContent = highscore;
+  updateMenuCoins();
+  $('menu').classList.remove('hidden');
+  $('shop').classList.add('hidden');
+  $('gameover').classList.add('hidden');
+  $('pause').classList.add('hidden');
+  $('hud').classList.add('hidden');
+  $('tutorialHint').classList.remove('visible');
+  resetIdleScene();
+}
+function pauseGame(){ if(state===STATE.PLAYING){ state=STATE.PAUSED; $('pause').classList.remove('hidden'); holding=false; } }
+function resumeGame(){ if(state===STATE.PAUSED){ state=STATE.PLAYING; $('pause').classList.add('hidden'); lastTime=performance.now(); } }
+function gameOver(){
+  state = STATE.GAMEOVER;
+  screenShake=22; flashAlpha=0.55;
+  spawnExplosion(boat.x, boat.y);
+  holding=false;
+  $('tutorialHint').classList.remove('visible');
+  if(score > highscore){ highscore=score; try{ localStorage.setItem('tidal_highscore', String(highscore)); }catch(e){} }
+  var earned = Math.floor(score/2);
+  coins += earned; saveProgress();
+  $('goCoinsEarned').textContent = earned;
+  updateMenuCoins();
+  $('finalScore').textContent = score;
+  $('finalHighscore').textContent = highscore;
+  $('hud').classList.add('hidden');
+  setTimeout(function(){ if(state===STATE.GAMEOVER) $('gameover').classList.remove('hidden'); }, 750);
+}
+function resetIdleScene(){
+  waterY = H*0.62; waterVel=0;
+  boat.x = Math.max(W*0.22, 80);
+  boat.y = waterY - BOAT_H*0.4;
+  boat.angle = 0;
+  particles=[]; obstacles=[]; bubbles=[]; floaters=[];
+}
+
+// ============ UPDATE ============
+function update(dt){
+  if(dt>0.05) dt=0.05;
+  if(state===STATE.PLAYING){
+    gameTime += dt;
+    if(tutorialTimer>0){ tutorialTimer-=dt; if(tutorialTimer<=0) $('tutorialHint').classList.remove('visible'); }
+    scrollSpeed = 260 + Math.min(distance*0.55, 280);
+    var targetVel = holding ? -WATER_RISE_SPEED : WATER_FALL_SPEED;
+    var resp = holding ? WATER_RISE_RESPONSIVENESS : WATER_FALL_RESPONSIVENESS;
+    var lf = 1 - Math.exp(-resp*dt);
+    waterVel += (targetVel - waterVel)*lf;
+    if(waterVel > WATER_MAX_SPEED) waterVel = WATER_MAX_SPEED;
+    if(waterVel < -WATER_MAX_SPEED) waterVel = -WATER_MAX_SPEED;
+    waterY += waterVel*dt;
+    var minY=H*0.08, maxY=H*0.92;
+    if(waterY<minY){ waterY=minY; if(waterVel<0) waterVel*=-0.35; }
+    if(waterY>maxY){ waterY=maxY; if(waterVel>0) waterVel*=-0.35; }
+    if(Math.abs(waterVel)>140 && Math.random()<0.65){
+      var intensity = Math.min(1, Math.abs(waterVel)/WATER_MAX_SPEED);
+      spawnDirectionalSplash(boat.x, waterY, intensity, waterVel<0);
+    }
+    var bob = Math.sin(gameTime*3.2)*2.2 + Math.sin(gameTime*5.7)*0.9;
+    boat.y = waterY - BOAT_H*0.4 + bob;
+    var idleRock = Math.sin(gameTime*2.1)*0.035;
+    var targetAngle = waterVel*0.0011 + idleRock;
+    if(targetAngle>0.42) targetAngle=0.42;
+    if(targetAngle<-0.42) targetAngle=-0.42;
+    boat.angle += (targetAngle - boat.angle)*(1 - Math.exp(-11*dt));
+    distance += scrollSpeed*dt*0.01;
+    obstacleSpawnTimer -= dt;
+    if(obstacleSpawnTimer<=0){
+      spawnObstacle();
+      var baseInterval = Math.max(1.05, 2.0 - distance*0.004);
+      obstacleSpawnTimer = baseInterval + Math.random()*0.35;
+    }
+    bubbleSpawnTimer -= dt;
+    if(bubbleSpawnTimer<=0){
+      if(spawnBubble(W+26)) bubbleSpawnTimer = 1.6 + Math.random()*2.2;
+      else bubbleSpawnTimer = 0.15;
+    }
+    for(var i=obstacles.length-1;i>=0;i--){
+      var obs = obstacles[i];
+      obs.x -= scrollSpeed*dt;
+      obs.glowPulse += dt*3;
+      if(!obs.passed && obs.x+obs.width < boat.x-BOAT_W*0.5){ obs.passed=true; score+=1; $('score').textContent=score; }
+      if(obs.x + obs.width < -60) obstacles.splice(i,1);
+    }
+    for(var j=bubbles.length-1;j>=0;j--){
+      var b = bubbles[j];
+      b.x -= scrollSpeed*dt; b.bob+=dt*2; b.pulse+=dt*4;
+      b.rotation += dt*(b.isSuper?2.2:0);
+      var dx = b.x - boat.x;
+      var dy = (b.y + Math.sin(b.bob)*5) - boat.y;
+      var hitR = BOAT_W*0.5 + b.r;
+      if(dx*dx + dy*dy < hitR*hitR){
+        var pts = b.isSuper?25:5;
+        score += pts; $('score').textContent = score;
+        var pcol = b.isSuper ? (Math.random()<0.5?'rgba(255,120,220,0.95)':'rgba(200,150,255,0.95)') : 'rgba(255,215,0,0.95)';
+        var pc = b.isSuper?26:14;
+        for(var k=0;k<pc;k++){
+          var a = Math.random()*Math.PI*2;
+          var sp = b.isSuper?280:220;
+          spawnParticle(b.x,b.y,Math.cos(a)*sp,Math.sin(a)*sp,{life:0.6,size:b.isSuper?4.5:3.5,color:pcol,gravity:0});
+        }
+        floaters.push({x:b.x,y:b.y,text:'+'+pts,life:1,maxLife:1,vy:-80,color:b.isSuper?'#ff80ff':'#ffd700',size:b.isSuper?28:22});
+        bubbles.splice(j,1);
+        continue;
+      }
+      if(b.x < -60) bubbles.splice(j,1);
+    }
+    var bt = boat.y - BOAT_H*0.4;
+    var bb = boat.y + BOAT_H*0.4;
+    var bl = boat.x - BOAT_W*0.4;
+    var br = boat.x + BOAT_W*0.4;
+    for(var m=0;m<obstacles.length;m++){
+      var o2 = obstacles[m];
+      if(br > o2.x+4 && bl < o2.x+o2.width-4){
+        if(bt < o2.gapY || bb > o2.gapY+o2.gapHeight){ gameOver(); break; }
+      }
+    }
+  }
+  for(var p=particles.length-1;p>=0;p--){
+    var pa = particles[p];
+    pa.life -= dt;
+    if(pa.life<=0){ particles.splice(p,1); continue; }
+    pa.vy += pa.gravity*dt;
+    pa.x += pa.vx*dt; pa.y += pa.vy*dt;
+  }
+  for(var f=floaters.length-1;f>=0;f--){
+    var fl = floaters[f];
+    fl.life -= dt;
+    fl.y += fl.vy*dt; fl.vy *= 0.95;
+    if(fl.life<=0) floaters.splice(f,1);
+  }
+  if(screenShake>0) screenShake *= Math.exp(-8*dt);
+  if(screenShake<0.5) screenShake = 0;
+  if(flashAlpha>0) flashAlpha -= dt*1.5;
+  if(flashAlpha<0) flashAlpha = 0;
+  if(state===STATE.MENU || state===STATE.GAMEOVER){
+    gameTime += dt;
+    waterY = H*0.62;
+    boat.y = waterY - BOAT_H*0.4 + Math.sin(gameTime*1.5)*3;
+    boat.angle = Math.sin(gameTime*1.2)*0.05;
+  }
+}
+
+// ============ HINTERGRUND ============
+var ambientBubbles = [];
+for(var ab=0;ab<32;ab++){ ambientBubbles.push({x:Math.random(),y:Math.random(),r:1+Math.random()*3.5,speed:0.006+Math.random()*0.02,drift:Math.random()*Math.PI*2,depth:Math.random()}); }
+function drawBackground(){
+  var grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'#0a1128');
+  grad.addColorStop(0.4,'#0d1f3f');
+  grad.addColorStop(0.7,'#122f5a');
+  grad.addColorStop(1,'#081428');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+  for(var i=0;i<50;i++){
+    var sx = (i*137.5 + gameTime*4)%W;
+    var sy = (i*73.3)%(H*0.72);
+    var alpha = 0.15 + Math.abs(Math.sin(gameTime*1.5+i))*0.25;
+    ctx.fillStyle = 'rgba(200,230,255,'+alpha+')';
+    ctx.beginPath(); ctx.arc(sx,sy,1.2,0,Math.PI*2); ctx.fill();
+  }
+  for(var b=0;b<ambientBubbles.length;b++){
+    var bb = ambientBubbles[b];
+    bb.y -= bb.speed*0.016; bb.drift += 0.015;
+    if(bb.y<-0.1){ bb.y=1.1; bb.x=Math.random(); }
+    var px = (bb.x + Math.sin(bb.drift)*0.02)*W;
+    var py = bb.y*H;
+    ctx.fillStyle = 'rgba(168,240,255,'+(0.08+bb.depth*0.2)+')';
+    ctx.beginPath(); ctx.arc(px,py,bb.r*(0.5+bb.depth),0,Math.PI*2); ctx.fill();
+  }
+}
+
+// ============ WASSER ============
+var foamParticles = [];
+for(var fp=0;fp<15;fp++) foamParticles.push({offset:Math.random(),speed:0.6+Math.random()*1.2,y:Math.random()*4-2,size:1.5+Math.random()*2.5,alpha:0.3+Math.random()*0.4});
+function drawWater(){
+  var wy = waterY, t = gameTime, step = 3, current = t*32;
+  var wavePts = [];
+  for(var x=0;x<=W+step;x+=step){
+    var y = wy;
+    y += Math.sin((x+current)*0.004 - t*1.1)*9;
+    y += Math.sin((x-current*0.7)*0.009 + t*1.8)*5;
+    y += Math.sin((x+current*1.3)*0.017 - t*2.6)*2.5;
+    y += Math.sin((x-current*0.5)*0.026 + t*3.4)*1.6;
+    y += Math.sin((x+current*2)*0.055 - t*5)*0.8;
+    wavePts.push({x:x,y:y});
+  }
+  function buildPath(){
+    ctx.beginPath();
+    ctx.moveTo(0,H); ctx.lineTo(wavePts[0].x, wavePts[0].y);
+    for(var i=1;i<wavePts.length;i++) ctx.lineTo(wavePts[i].x, wavePts[i].y);
+    ctx.lineTo(wavePts[wavePts.length-1].x, H); ctx.closePath();
+  }
+  var grad = ctx.createLinearGradient(0,wy-30,0,H);
+  grad.addColorStop(0,'rgba(95,200,250,0.65)');
+  grad.addColorStop(0.10,'rgba(50,160,230,0.82)');
+  grad.addColorStop(0.30,'rgba(22,100,190,0.92)');
+  grad.addColorStop(0.60,'rgba(10,55,140,0.96)');
+  grad.addColorStop(0.85,'rgba(4,25,85,0.98)');
+  grad.addColorStop(1,'rgba(1,8,35,0.99)');
+  buildPath(); ctx.fillStyle = grad; ctx.fill();
+  ctx.save(); buildPath(); ctx.clip();
+  ctx.globalCompositeOperation = 'lighter';
+  for(var r=0;r<6;r++){
+    var bx = ((r/6)*W + Math.sin(t*0.5+r*1.3)*60 + W)%W;
+    var rayW = 30 + Math.sin(t+r)*15;
+    var rg = ctx.createLinearGradient(bx,wy,bx,H);
+    rg.addColorStop(0,'rgba(150,220,255,0.10)');
+    rg.addColorStop(1,'rgba(150,220,255,0)');
+    ctx.fillStyle = rg;
+    ctx.beginPath();
+    ctx.moveTo(bx-rayW*0.3, wy); ctx.lineTo(bx+rayW*0.3, wy);
+    ctx.lineTo(bx+rayW, H); ctx.lineTo(bx, H); ctx.closePath(); ctx.fill();
+  }
+  for(var c=0;c<8;c++){
+    var cx = ((c*173 + t*45)%(W+200)) - 100;
+    var cy = wy + 40 + (c%4)*55 + Math.sin(t*1.5+c)*28;
+    var cr = 55 + Math.sin(t*0.8+c*2)*18;
+    var cg = ctx.createRadialGradient(cx,cy,0,cx,cy,cr);
+    cg.addColorStop(0,'rgba(180,230,255,0.12)');
+    cg.addColorStop(0.6,'rgba(140,210,255,0.05)');
+    cg.addColorStop(1,'rgba(180,230,255,0)');
+    ctx.fillStyle = cg;
+    ctx.beginPath(); ctx.arc(cx,cy,cr,0,Math.PI*2); ctx.fill();
+  }
+  var dg = ctx.createRadialGradient(W*0.5,H,0,W*0.5,H,H*0.85);
+  dg.addColorStop(0,'rgba(0,70,200,0.32)');
+  dg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = dg; ctx.fillRect(0,wy,W,H-wy);
+  for(var l=1;l<5;l++){
+    var ly = wy + (H-wy)*(l/5);
+    ctx.fillStyle = 'rgba(80,160,230,'+(0.06-l*0.01)+')';
+    ctx.fillRect(0, ly + Math.sin(t*1.5+l)*3, W, 2);
+  }
+  ctx.restore();
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+  ctx.beginPath();
+  for(var i1=0;i1<wavePts.length;i1++){ if(i1===0) ctx.moveTo(wavePts[i1].x, wavePts[i1].y-4); else ctx.lineTo(wavePts[i1].x, wavePts[i1].y-4); }
+  ctx.strokeStyle = 'rgba(120,210,255,0.30)'; ctx.lineWidth = 14; ctx.stroke();
+  ctx.beginPath();
+  for(var i2=0;i2<wavePts.length;i2++){ if(i2===0) ctx.moveTo(wavePts[i2].x, wavePts[i2].y-2); else ctx.lineTo(wavePts[i2].x, wavePts[i2].y-2); }
+  ctx.strokeStyle = 'rgba(180,235,255,0.55)'; ctx.lineWidth = 5; ctx.stroke();
+  ctx.beginPath();
+  for(var i3=0;i3<wavePts.length;i3++){ if(i3===0) ctx.moveTo(wavePts[i3].x, wavePts[i3].y-0.5); else ctx.lineTo(wavePts[i3].x, wavePts[i3].y-0.5); }
+  ctx.strokeStyle = 'rgba(240,250,255,0.95)'; ctx.lineWidth = 1.8; ctx.stroke();
+  ctx.restore();
+  for(var fp2=0;fp2<foamParticles.length;fp2++){
+    var fpa = foamParticles[fp2];
+    var fx = ((fpa.offset*W + t*40*fpa.speed)%(W+40)) - 20;
+    var idx = Math.max(0, Math.min(wavePts.length-1, Math.floor(fx/step)));
+    var fy = wavePts[idx].y + fpa.y;
+    ctx.fillStyle = 'rgba(255,255,255,'+fpa.alpha+')';
+    ctx.beginPath(); ctx.arc(fx,fy,fpa.size,0,Math.PI*2); ctx.fill();
+  }
+  for(var g=0;g<30;g++){
+    var sx2 = (g*61 + t*55)%W;
+    var idx2 = Math.floor(sx2/step);
+    if(idx2>=0 && idx2<wavePts.length){
+      var sy2 = wavePts[idx2].y;
+      var tw = Math.abs(Math.sin(t*3.5 + g*1.7));
+      if(tw>0.55){
+        ctx.fillStyle = 'rgba(255,255,255,'+Math.min(1,(tw-0.55)*1.8)+')';
+        ctx.beginPath(); ctx.arc(sx2, sy2-1, 1.5+Math.sin(t*5+g)*0.5, 0, Math.PI*2); ctx.fill();
+      }
+    }
+  }
+}
+
+// ============ SÄULEN ============
+function drawPillar(x,y,w,h,hue,pulse,isTop){
+  if(h<=0) return;
+  ctx.fillStyle = 'hsla('+hue+',100%,60%,'+(0.10*pulse)+')';
+  ctx.fillRect(x-6,y,w+12,h);
+  var grad = ctx.createLinearGradient(x,0,x+w,0);
+  grad.addColorStop(0,'hsla('+hue+',70%,22%,0.95)');
+  grad.addColorStop(0.3,'hsla('+hue+',80%,38%,0.98)');
+  grad.addColorStop(0.5,'hsla('+hue+',90%,50%,1)');
+  grad.addColorStop(0.7,'hsla('+hue+',80%,38%,0.98)');
+  grad.addColorStop(1,'hsla('+hue+',70%,22%,0.95)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(x,y,w,h);
+  ctx.fillStyle = 'hsla('+hue+',100%,70%,'+(0.4*pulse)+')';
+  ctx.fillRect(x+w*0.5-1,y,2,h);
+  var capY = isTop ? y+h-4 : y;
+  var capGrad = ctx.createLinearGradient(x,capY,x,capY+4);
+  capGrad.addColorStop(0,'hsla('+hue+',100%,78%,'+(0.9*pulse)+')');
+  capGrad.addColorStop(1,'hsla('+hue+',100%,50%,0)');
+  ctx.fillStyle = capGrad;
+  ctx.fillRect(x,capY,w,4);
+  ctx.strokeStyle = 'hsla('+hue+',100%,72%,'+(0.5*pulse)+')';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(x+0.5, y+0.5, w-1, h-1);
+  ctx.strokeStyle = 'hsla('+hue+',100%,80%,0.12)';
+  ctx.lineWidth = 1;
+  for(var i=1;i<4;i++){
+    var ly = y + (h/4)*i;
+    ctx.beginPath(); ctx.moveTo(x+5,ly); ctx.lineTo(x+w-5,ly); ctx.stroke();
+  }
+}
+function drawObstacle(obs){
+  var pulse = Math.sin(obs.glowPulse)*0.35 + 0.65;
+  var bottomY = obs.gapY + obs.gapHeight;
+  drawPillar(obs.x, 0, obs.width, obs.gapY, obs.hue, pulse, true);
+  drawPillar(obs.x, bottomY, obs.width, H-bottomY, obs.hue, pulse, false);
+  var gapGrad = ctx.createLinearGradient(obs.x, obs.gapY, obs.x, bottomY);
+  gapGrad.addColorStop(0,'hsla('+obs.hue+',100%,70%,'+(0.06*pulse)+')');
+  gapGrad.addColorStop(0.5,'hsla('+obs.hue+',100%,80%,'+(0.14*pulse)+')');
+  gapGrad.addColorStop(1,'hsla('+obs.hue+',100%,70%,'+(0.06*pulse)+')');
+  ctx.fillStyle = gapGrad;
+  ctx.fillRect(obs.x, obs.gapY, obs.width, obs.gapHeight);
+}
+
+// ============ BOOT ============
+var boatPalettes = {
+  classic: {hullTop:'#e8b878',hullMid:'#c8822c',hullDark:'#8f4a18',hullBottom:'#4a2208',stripe:'rgba(50,120,200,0.7)',sailTop:'#ffffff',sailMid:'#e4f4ff',sailBottom:'#a0cce4',flag:'#ff5757',glow:'rgba(168,240,255,0.32)'},
+  pirate: {hullTop:'#5a5a5a',hullMid:'#2a2a2a',hullDark:'#151515',hullBottom:'#000000',stripe:'rgba(180,30,30,0.75)',sailTop:'#3a3a3a',sailMid:'#252525',sailBottom:'#101010',flag:'#000000',glow:'rgba(255,80,80,0.28)'},
+  crystal: {hullTop:'#c0f8ff',hullMid:'#60d0ff',hullDark:'#0080e0',hullBottom:'#004090',stripe:'rgba(200,255,255,0.8)',sailTop:'#ffffff',sailMid:'#c0f8ff',sailBottom:'#60d0ff',flag:'#a0f0ff',glow:'rgba(100,220,255,0.45)'},
+  golden: {hullTop:'#fff5a0',hullMid:'#ffd700',hullDark:'#c08020',hullBottom:'#805000',stripe:'rgba(255,240,150,0.8)',sailTop:'#ffffff',sailMid:'#fff5a0',sailBottom:'#ffd700',flag:'#ffaa00',glow:'rgba(255,215,0,0.45)'}
+};
+function drawBoat(){
+  var pal = boatPalettes[selectedBoat] || boatPalettes.classic;
+  ctx.save();
+  ctx.translate(boat.x, boat.y);
+  ctx.rotate(boat.angle);
+  var hullGrad = ctx.createLinearGradient(0,0,0,BOAT_H*0.55);
+  hullGrad.addColorStop(0,pal.hullTop);
+  hullGrad.addColorStop(0.3,pal.hullMid);
+  hullGrad.addColorStop(0.65,pal.hullDark);
+  hullGrad.addColorStop(1,pal.hullBottom);
+  // Spiegelung
+  ctx.save(); ctx.globalAlpha = 0.22; ctx.scale(1,-1); ctx.translate(0, -BOAT_H*0.12);
+  ctx.beginPath();
+  ctx.moveTo(-BOAT_W*0.55,0);
+  ctx.quadraticCurveTo(-BOAT_W*0.55, BOAT_H*0.55, 0, BOAT_H*0.55);
+  ctx.quadraticCurveTo(BOAT_W*0.55, BOAT_H*0.55, BOAT_W*0.55, 0);
+  ctx.closePath();
+  ctx.fillStyle = pal.hullDark; ctx.fill();
+  ctx.restore();
+  // Glow
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  var gg = ctx.createRadialGradient(0,0,2,0,0,55);
+  gg.addColorStop(0,pal.glow);
+  gg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = gg;
+  ctx.beginPath(); ctx.arc(0,0,55,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  // Kielwasser
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  var wg = ctx.createLinearGradient(-BOAT_W*0.7,0,-BOAT_W*1.8,0);
+  wg.addColorStop(0,'rgba(200,240,255,0.5)');
+  wg.addColorStop(1,'rgba(200,240,255,0)');
+  ctx.fillStyle = wg;
+  ctx.beginPath();
+  ctx.moveTo(-BOAT_W*0.55,0);
+  ctx.lineTo(-BOAT_W*1.8, -BOAT_H*0.4);
+  ctx.lineTo(-BOAT_W*1.8, BOAT_H*0.6);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+  // Rumpf
+  ctx.beginPath();
+  ctx.moveTo(-BOAT_W*0.55, 0);
+  ctx.quadraticCurveTo(-BOAT_W*0.55, BOAT_H*0.55, 0, BOAT_H*0.55);
+  ctx.quadraticCurveTo(BOAT_W*0.55, BOAT_H*0.55, BOAT_W*0.55, 0);
+  ctx.closePath();
+  ctx.fillStyle = hullGrad; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,220,180,0.75)'; ctx.lineWidth = 1.3; ctx.stroke();
+  // Planken
+  for(var i=1;i<=3;i++){
+    var py = (BOAT_H*0.55)*(i/4);
+    ctx.strokeStyle = 'rgba(30,15,5,0.55)'; ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(-BOAT_W*0.5, py);
+    ctx.quadraticCurveTo(-BOAT_W*0.1, py+2, 0, py+1.5);
+    ctx.quadraticCurveTo(BOAT_W*0.1, py+2, BOAT_W*0.5, py);
+    ctx.stroke();
+  }
+  // Wasserlinie
+  ctx.fillStyle = pal.stripe;
+  ctx.fillRect(-BOAT_W*0.52, 0, BOAT_W*1.04, 2.5);
+  // Deck
+  ctx.beginPath();
+  ctx.moveTo(-BOAT_W*0.55,0); ctx.lineTo(BOAT_W*0.55,0);
+  ctx.strokeStyle = 'rgba(255,245,220,0.95)'; ctx.lineWidth = 2.3; ctx.stroke();
+  // Reling
+  ctx.strokeStyle = 'rgba(60,40,20,0.9)'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(-BOAT_W*0.5,-2); ctx.lineTo(BOAT_W*0.5,-2); ctx.stroke();
+  for(var ri=0;ri<5;ri++){
+    var rpx = -BOAT_W*0.4 + ri*(BOAT_W*0.8/4);
+    ctx.beginPath(); ctx.moveTo(rpx,-2); ctx.lineTo(rpx,0); ctx.stroke();
+  }
+  // Kabine
+  ctx.beginPath();
+  ctx.moveTo(-BOAT_W*0.1,0);
+  ctx.lineTo(-BOAT_W*0.1,-BOAT_H*0.42);
+  ctx.lineTo(BOAT_W*0.15,-BOAT_H*0.42);
+  ctx.lineTo(BOAT_W*0.15,0);
+  ctx.closePath();
+  var cabGrad = ctx.createLinearGradient(-BOAT_W*0.1,-BOAT_H*0.42,BOAT_W*0.15,0);
+  cabGrad.addColorStop(0,pal.hullMid);
+  cabGrad.addColorStop(0.5,pal.hullTop);
+  cabGrad.addColorStop(1,pal.hullDark);
+  ctx.fillStyle = cabGrad; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,220,180,0.6)'; ctx.lineWidth = 1; ctx.stroke();
+  // Fenster
+  ctx.fillStyle = 'rgba(255,240,150,1)';
+  ctx.shadowColor = 'rgba(255,220,100,0.95)'; ctx.shadowBlur = 12;
+  ctx.fillRect(-BOAT_W*0.06, -BOAT_H*0.34, BOAT_W*0.16, BOAT_H*0.16);
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(180,120,40,0.9)'; ctx.lineWidth = 0.8;
+  ctx.strokeRect(-BOAT_W*0.06, -BOAT_H*0.34, BOAT_W*0.16, BOAT_H*0.16);
+  // Mast
+  ctx.beginPath();
+  ctx.moveTo(BOAT_W*0.22,0); ctx.lineTo(BOAT_W*0.22,-BOAT_H*1.55);
+  ctx.strokeStyle = '#3a2410'; ctx.lineWidth = 2.5; ctx.stroke();
+  // Stagsegel
+  ctx.beginPath();
+  ctx.moveTo(BOAT_W*0.22,-BOAT_H*1.3);
+  ctx.quadraticCurveTo(BOAT_W*0.42,-BOAT_H*0.9,BOAT_W*0.62,-BOAT_H*0.5);
+  ctx.lineTo(BOAT_W*0.55,-BOAT_H*0.05);
+  ctx.closePath();
+  var jibGrad = ctx.createLinearGradient(BOAT_W*0.22,-BOAT_H*1.3,BOAT_W*0.62,-BOAT_H*0.5);
+  jibGrad.addColorStop(0,pal.sailTop);
+  jibGrad.addColorStop(1,pal.sailMid);
+  ctx.fillStyle = jibGrad;
+  ctx.shadowColor = pal.glow; ctx.shadowBlur = 10;
+  ctx.fill(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(200,230,250,0.5)'; ctx.lineWidth = 0.7; ctx.stroke();
+  // Großsegel
+  ctx.beginPath();
+  ctx.moveTo(BOAT_W*0.22,-BOAT_H*0.15);
+  ctx.quadraticCurveTo(-BOAT_W*0.05,-BOAT_H*0.75, BOAT_W*0.05,-BOAT_H*1.42);
+  ctx.lineTo(BOAT_W*0.22,-BOAT_H*1.5);
+  ctx.closePath();
+  var sailGrad = ctx.createLinearGradient(BOAT_W*0.22,-BOAT_H*1.5,0,0);
+  sailGrad.addColorStop(0,pal.sailTop);
+  sailGrad.addColorStop(0.45,pal.sailMid);
+  sailGrad.addColorStop(1,pal.sailBottom);
+  ctx.fillStyle = sailGrad;
+  ctx.shadowColor = pal.glow; ctx.shadowBlur = 12;
+  ctx.fill(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 0.9; ctx.stroke();
+  // Segelnähte
+  ctx.strokeStyle = 'rgba(160,200,225,0.45)'; ctx.lineWidth = 0.6;
+  for(var sn=1;sn<3;sn++){
+    var sy = -BOAT_H*(0.35+sn*0.35);
+    ctx.beginPath();
+    ctx.moveTo(BOAT_W*0.21, sy);
+    ctx.quadraticCurveTo(BOAT_W*0.12, sy-2, BOAT_W*0.04, sy);
+    ctx.stroke();
+  }
+  // Rigging
+  ctx.strokeStyle = 'rgba(60,40,20,0.7)'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(BOAT_W*0.22,-BOAT_H*1.55); ctx.lineTo(BOAT_W*0.55,-BOAT_H*0.03); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(BOAT_W*0.22,-BOAT_H*1.55); ctx.lineTo(-BOAT_W*0.4,-BOAT_H*0.02); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(BOAT_W*0.22,-BOAT_H*0.9); ctx.lineTo(-BOAT_W*0.35,-BOAT_H*0.02); ctx.stroke();
+  // Laterne
+  var lp = 0.85 + Math.sin(gameTime*4)*0.15;
+  ctx.fillStyle = 'rgba(255,220,90,'+lp+')';
+  ctx.shadowColor = 'rgba(255,210,80,0.95)'; ctx.shadowBlur = 16;
+  ctx.beginPath(); ctx.arc(BOAT_W*0.22, -BOAT_H*1.6, 3, 0, Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+  // Flagge
+  ctx.beginPath();
+  ctx.moveTo(BOAT_W*0.22,-BOAT_H*1.58);
+  ctx.lineTo(BOAT_W*0.52,-BOAT_H*1.46);
+  ctx.lineTo(BOAT_W*0.22,-BOAT_H*1.34);
+  ctx.closePath();
+  ctx.fillStyle = pal.flag; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,150,150,0.7)'; ctx.lineWidth = 0.6; ctx.stroke();
+  // Bugspriet
+  ctx.beginPath();
+  ctx.moveTo(BOAT_W*0.55,-1); ctx.lineTo(BOAT_W*0.78,-BOAT_H*0.15);
+  ctx.strokeStyle = '#3a2410'; ctx.lineWidth = 2.2; ctx.stroke();
+  ctx.restore();
+}
+
+// ============ BUBBLES ============
+function drawBubbles(){
+  for(var i=0;i<bubbles.length;i++){
+    var b = bubbles[i];
+    var px = b.x;
+    var py = b.y + Math.sin(b.bob)*5;
+    var pulse = Math.sin(b.pulse)*0.3 + 0.7;
+    if(b.isSuper){
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      var gr = b.r*3.2;
+      var g = ctx.createRadialGradient(px,py,2,px,py,gr);
+      g.addColorStop(0,'rgba(255,120,220,'+(0.65*pulse)+')');
+      g.addColorStop(0.4,'rgba(140,120,255,'+(0.35*pulse)+')');
+      g.addColorStop(1,'rgba(100,200,255,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(px,py,gr,0,Math.PI*2); ctx.fill();
+      ctx.translate(px,py); ctx.rotate(b.rotation);
+      for(var k=0;k<8;k++){
+        var a = (k/8)*Math.PI*2;
+        ctx.strokeStyle = 'hsla('+((k*45+b.rotation*50)%360)+',100%,70%,'+(0.4*pulse)+')';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a)*b.r*1.3, Math.sin(a)*b.r*1.3);
+        ctx.lineTo(Math.cos(a)*b.r*1.8, Math.sin(a)*b.r*1.8);
+        ctx.stroke();
+      }
+      ctx.restore();
+      var bg = ctx.createRadialGradient(px-b.r*0.35,py-b.r*0.4,b.r*0.1,px,py,b.r);
+      bg.addColorStop(0,'#ffffff'); bg.addColorStop(0.25,'#ff80ff');
+      bg.addColorStop(0.5,'#8080ff'); bg.addColorStop(0.75,'#80d0ff');
+      bg.addColorStop(1,'#ff80d0');
+      ctx.fillStyle = bg;
+      ctx.beginPath(); ctx.arc(px,py,b.r,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,'+(0.7*pulse)+')'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(px,py,b.r*0.6,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath(); ctx.arc(px-b.r*0.32, py-b.r*0.35, b.r*0.26, 0, Math.PI*2); ctx.fill();
+    } else {
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      var gr2 = b.r*2.8;
+      var g2 = ctx.createRadialGradient(px,py,2,px,py,gr2);
+      g2.addColorStop(0,'rgba(255,215,0,'+(0.55*pulse)+')');
+      g2.addColorStop(0.5,'rgba(255,180,0,'+(0.20*pulse)+')');
+      g2.addColorStop(1,'rgba(255,215,0,0)');
+      ctx.fillStyle = g2;
+      ctx.beginPath(); ctx.arc(px,py,gr2,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+      var bg2 = ctx.createRadialGradient(px-b.r*0.35,py-b.r*0.4,b.r*0.1,px,py,b.r);
+      bg2.addColorStop(0,'rgba(255,255,240,1)');
+      bg2.addColorStop(0.35,'rgba(255,235,120,0.95)');
+      bg2.addColorStop(0.75,'rgba(255,190,40,0.9)');
+      bg2.addColorStop(1,'rgba(210,140,0,0.85)');
+      ctx.fillStyle = bg2;
+      ctx.beginPath(); ctx.arc(px,py,b.r,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,220,'+(0.5*pulse)+')'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px,py,b.r*0.6,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath(); ctx.arc(px-b.r*0.32, py-b.r*0.35, b.r*0.25, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath(); ctx.arc(px+b.r*0.3, py+b.r*0.15, b.r*0.12, 0, Math.PI*2); ctx.fill();
+    }
+  }
+}
+
+// ============ PARTIKEL + FLOATER ============
+function drawParticles(){
+  for(var i=0;i<particles.length;i++){
+    var p = particles[i];
+    ctx.globalAlpha = Math.max(0, p.life/p.maxLife);
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+function drawFloaters(){
+  ctx.textAlign = 'center';
+  for(var i=0;i<floaters.length;i++){
+    var f = floaters[i];
+    ctx.globalAlpha = Math.max(0, f.life/f.maxLife);
+    ctx.fillStyle = f.color || '#ffd700';
+    ctx.font = '900 '+(f.size||22)+'px -apple-system, "Segoe UI", sans-serif';
+    ctx.shadowColor = f.color || 'rgba(255,215,0,0.9)';
+    ctx.shadowBlur = 12;
+    ctx.fillText(f.text, f.x, f.y);
+  }
+  ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+}
+
+// ============ RENDER ============
+function render(){
+  ctx.save();
+  if(screenShake>0){ ctx.translate((Math.random()-0.5)*screenShake, (Math.random()-0.5)*screenShake); }
+  drawBackground();
+  drawWater();
+  for(var i=0;i<obstacles.length;i++) drawObstacle(obstacles[i]);
+  drawBubbles();
+  if(state!==STATE.GAMEOVER) drawBoat();
+  drawParticles();
+  drawFloaters();
+  ctx.restore();
+  if(flashAlpha>0){
+    ctx.fillStyle = 'rgba(255,120,120,'+Math.min(1,flashAlpha)+')';
+    ctx.fillRect(0,0,W,H);
+  }
+}
+
+// ============ GAME LOOP ============
+function loop(now){
+  var dt = Math.min((now - lastTime)/1000, 0.05);
+  lastTime = now;
+  if(state===STATE.PLAYING || state===STATE.MENU || state===STATE.GAMEOVER){ update(dt); }
+  else { gameTime += dt*0.001; }
+  render();
+  requestAnimationFrame(loop);
+}
+
+// ============ ADMIN PANEL ============
 var ADMIN_CODE = 'TIDAL2024';
 var adminTrigger = $('adminTrigger');
 var adminLogin = $('adminLogin');
@@ -923,19 +935,14 @@ var adminPanel = $('adminPanel');
 var adminCodeInput = $('adminCodeInput');
 var adminError = $('adminError');
 var adminCoinsEl = $('adminCoins');
-
 function updateAdminCoins(){ if(adminCoinsEl) adminCoinsEl.textContent = coins; }
-
 adminTrigger.addEventListener('click', function(){
   adminLogin.classList.remove('hidden');
   adminCodeInput.value = '';
   adminError.textContent = '';
   setTimeout(function(){ adminCodeInput.focus(); }, 150);
 });
-$('adminCancelBtn').addEventListener('click', function(){
-  adminLogin.classList.add('hidden');
-});
-
+$('adminCancelBtn').addEventListener('click', function(){ adminLogin.classList.add('hidden'); });
 function tryAdminLogin(){
   var code = (adminCodeInput.value || '').trim().toUpperCase();
   if(code === ADMIN_CODE){
@@ -949,72 +956,31 @@ function tryAdminLogin(){
   }
 }
 $('adminLoginBtn').addEventListener('click', tryAdminLogin);
-adminCodeInput.addEventListener('keydown', function(e){
-  if(e.key === 'Enter'){ e.preventDefault(); tryAdminLogin(); }
-});
-
-$('adminCloseBtn').addEventListener('click', function(){
-  adminPanel.classList.add('hidden');
-  updateMenuCoins();
-});
-
+adminCodeInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); tryAdminLogin(); } });
+$('adminCloseBtn').addEventListener('click', function(){ adminPanel.classList.add('hidden'); updateMenuCoins(); });
 var adminActionBtns = document.querySelectorAll('[data-admin]');
-for(var ai = 0; ai < adminActionBtns.length; ai++){
-  adminActionBtns[ai].addEventListener('click', handleAdminAction);
-}
-
+for(var ai=0; ai<adminActionBtns.length; ai++){ adminActionBtns[ai].addEventListener('click', handleAdminAction); }
 function handleAdminAction(){
   var action = this.dataset.admin;
-  if(action === 'coins1000'){ coins += 1000; saveProgress(); updateMenuCoins(); updateAdminCoins(); }
-  else if(action === 'coins9999'){ coins += 9999; saveProgress(); updateMenuCoins(); updateAdminCoins(); }
-  else if(action === 'allSkins'){
-    ownedSkins.boats = ['classic','pirate','crystal','golden'];
-    ownedSkins.walls = ['crystal','neon','lava','ice'];
-    saveProgress();
-    if(typeof renderShop === 'function' && currentShopTab) renderShop();
-    updateMenuCoins();
-  }
-  else if(action === 'unlockBoats'){
-    ownedSkins.boats = ['classic','pirate','crystal','golden'];
-    saveProgress();
-    if(typeof renderShop === 'function' && currentShopTab) renderShop();
-  }
-  else if(action === 'unlockWalls'){
-    ownedSkins.walls = ['crystal','neon','lava','ice'];
-    saveProgress();
-    if(typeof renderShop === 'function' && currentShopTab) renderShop();
-  }
-  else if(action === 'highscore9999'){
-    highscore = 9999;
-    try{ localStorage.setItem('tidal_highscore', '9999'); }catch(e){}
-    $('menuHighscore').textContent = '9999';
-  }
-  else if(action === 'clearCoins'){
-    if(confirm('Münzen wirklich auf 0 setzen?')){
-      coins = 0; saveProgress(); updateMenuCoins(); updateAdminCoins();
-    }
-  }
-  else if(action === 'resetAll'){
-    if(confirm('WIRKLICH ALLES zurücksetzen? (Coins, Skins, Highscore)')){
-      coins = 0;
-      ownedSkins = { boats: ['classic'], walls: ['crystal'] };
-      selectedBoat = 'classic';
-      selectedWall = 'crystal';
-      highscore = 0;
-      try{
-        localStorage.setItem('tidal_coins', '0');
-        localStorage.setItem('tidal_owned', JSON.stringify(ownedSkins));
-        localStorage.setItem('tidal_boat', 'classic');
-        localStorage.setItem('tidal_wall', 'crystal');
-        localStorage.setItem('tidal_highscore', '0');
-      }catch(e){}
-      $('menuHighscore').textContent = '0';
-      updateMenuCoins();
-      updateAdminCoins();
-      if(typeof renderShop === 'function' && currentShopTab) renderShop();
-    }
-  }
+  if(action==='coins1000'){ coins += 1000; saveProgress(); updateMenuCoins(); updateAdminCoins(); }
+  else if(action==='coins9999'){ coins += 9999; saveProgress(); updateMenuCoins(); updateAdminCoins(); }
+  else if(action==='allSkins'){ ownedSkins.boats=['classic','pirate','crystal','golden']; ownedSkins.walls=['crystal','neon','lava','ice']; saveProgress(); if(typeof renderShop==='function' && currentShopTab) renderShop(); updateMenuCoins(); }
+  else if(action==='unlockBoats'){ ownedSkins.boats=['classic','pirate','crystal','golden']; saveProgress(); if(typeof renderShop==='function' && currentShopTab) renderShop(); }
+  else if(action==='unlockWalls'){ ownedSkins.walls=['crystal','neon','lava','ice']; saveProgress(); if(typeof renderShop==='function' && currentShopTab) renderShop(); }
+  else if(action==='highscore9999'){ highscore=9999; try{ localStorage.setItem('tidal_highscore','9999'); }catch(e){} $('menuHighscore').textContent='9999'; }
+  else if(action==='clearCoins'){ if(confirm('Münzen wirklich auf 0 setzen?')){ coins=0; saveProgress(); updateMenuCoins(); updateAdminCoins(); } }
+  else if(action==='resetAll'){ if(confirm('WIRKLICH ALLES zurücksetzen? (Coins, Skins, Highscore)')){ coins=0; ownedSkins={boats:['classic'],walls:['crystal']}; selectedBoat='classic'; selectedWall='crystal'; highscore=0; try{ localStorage.setItem('tidal_coins','0'); localStorage.setItem('tidal_owned',JSON.stringify(ownedSkins)); localStorage.setItem('tidal_boat','classic'); localStorage.setItem('tidal_wall','crystal'); localStorage.setItem('tidal_highscore','0'); }catch(e){} $('menuHighscore').textContent='0'; updateMenuCoins(); updateAdminCoins(); if(typeof renderShop==='function' && currentShopTab) renderShop(); } }
 }
 
-console.log('%c⚙ Admin Panel ready — Code: TIDAL2024', 'color:#ff80ff; font-weight:bold; font-size:13px;');
-    
+// ============ INIT ============
+applyLanguage(currentLang);
+resetIdleScene();
+updateMenuCoins();
+requestAnimationFrame(loop);
+console.log('%c🌊 TIDAL v2.2 ready — Shop + Admin Panel aktiv', 'color:#4dc8ff; font-weight:bold; font-size:14px;');
+console.log('%c⚙ Admin-Code: TIDAL2024 (Zahnrad unten links im Menü)', 'color:#ff80ff; font-weight:bold; font-size:13px;');
+
+})();
+</script>
+</body>
+</html>
